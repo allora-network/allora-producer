@@ -1,0 +1,76 @@
+database:
+  url: "postgres://devuser:devpass@localhost:5432/dev-indexer?sslmode=disable"
+
+kafka:
+  seeds:
+    - "localhost:9092"
+  user: "user"
+  password: "pass"
+
+allora:
+  rpc: "https://allora-rpc.testnet.allora.network"
+  timeout: 10
+
+log:
+  level: 1 # -1: trace, 0: debug, 1: info, 2: warn, 3: error, 4: fatal, 5: panic, 6: nolevel, 7: disabled
+
+monitor:
+  block_refresh_interval: 5s
+  rate_limit_interval: 1s
+
+kafka_topic_router:
+  - name: "topic.staking"
+    types:
+      - "emissions.v3.MsgAddStake"
+      - "emissions.v3.MsgRemoveStake"
+      - "emissions.v4.AddStakeRequest"
+      - "emissions.v4.RemoveStakeRequest"
+  - name: "topic.delegation"
+    types:
+      - "emissions.v3.StakeInfo"
+      - "emissions.v3.DelegateStakeRemovalInfo"
+  - name: "topic.reputer-loss"
+    types:
+      - "emissions.v3.MsgInsertReputerPayload"
+      - "emissions.v4.InsertReputerPayloadRequest"
+  - name: "topic.worker-loss"
+    types:
+      - "emissions.v3.EventNetworkLossSet"
+      - "emissions.v4.EventNetworkLossSet"
+  - name: "topic.rewards"
+    types:
+      - "emissions.v3.EventRewardsSettled"
+      - "emissions.v4.EventRewardsSettled"
+  - name: "topic.registration"
+    types:
+      - "emissions.v3.MsgRegister"
+      - "emissions.v3.MsgRemoveRegistration"
+      - "emissions.v4.RemoveRegistrationRequest"
+      - "emissions.v4.RegisterRequest"
+  - name: "domain-event.input.allora.transfer"
+    types:
+      - "cosmos.bank.v1beta1.MsgSend"
+
+filter_event:
+  types:
+    - "emissions.v3.EventNetworkLossSet"
+    - "emissions.v3.EventRewardsSettled"
+    - "emissions.v4.EventNetworkLossSet"
+    - "emissions.v4.EventRewardsSettled"
+
+filter_transaction:
+  types:
+    - "emissions.v3.MsgAddStake"
+    - "emissions.v3.MsgRemoveStake"
+    - "emissions.v3.MsgInsertReputerPayload"
+    - "emissions.v3.MsgRegister"
+    - "emissions.v3.MsgRemoveRegistration"
+    - "emissions.v3.StakeInfo"
+    - "emissions.v3.DelegateStakeRemovalInfo"
+    - "emissions.v4.AddStakeRequest"
+    - "emissions.v4.RemoveStakeRequest"
+    - "emissions.v4.InsertReputerPayloadRequest"
+    - "emissions.v4.RegisterRequest"
+    - "emissions.v4.RemoveRegistrationRequest"
+    - "cosmos.bank.v1beta1.MsgSend"
+
