@@ -23,18 +23,18 @@ var (
 	ErrParseTransaction = errors.New("failed to parse transaction")
 )
 
-type MonitorService struct {
-	kafkaClient              domain.StreamingClient
+type ProcessorService struct {
+	streamingClient          domain.StreamingClient
 	codec                    domain.CodecInterface
 	filterEvent              domain.FilterInterface[abci.Event]
 	filterTransactionMessage domain.FilterInterface[codectypes.Any]
 }
 
-var _ domain.MonitorService = &MonitorService{}
+var _ domain.ProcessorService = &ProcessorService{}
 
-func NewMonitorService(kafkaClient domain.StreamingClient, codec domain.CodecInterface, filterEvent domain.FilterInterface[abci.Event],
-	filterTransactionMessage domain.FilterInterface[codectypes.Any]) (*MonitorService, error) {
-	if kafkaClient == nil {
+func NewProcessorService(streamingClient domain.StreamingClient, codec domain.CodecInterface, filterEvent domain.FilterInterface[abci.Event],
+	filterTransactionMessage domain.FilterInterface[codectypes.Any]) (*ProcessorService, error) {
+	if streamingClient == nil {
 		return nil, fmt.Errorf("kafkaClient is nil")
 	}
 	if codec == nil {
@@ -47,11 +47,11 @@ func NewMonitorService(kafkaClient domain.StreamingClient, codec domain.CodecInt
 		return nil, fmt.Errorf("filterTransactionMessage is nil")
 	}
 
-	return &MonitorService{kafkaClient: kafkaClient, codec: codec, filterEvent: filterEvent, filterTransactionMessage: filterTransactionMessage}, nil
+	return &ProcessorService{streamingClient: streamingClient, codec: codec, filterEvent: filterEvent, filterTransactionMessage: filterTransactionMessage}, nil
 }
 
-// ProcessBlock implements domain.MonitorService.
-func (m *MonitorService) ProcessBlock(ctx context.Context, block *coretypes.ResultBlock) error {
+// ProcessBlock implements domain.ProcessorService.
+func (m *ProcessorService) ProcessBlock(ctx context.Context, block *coretypes.ResultBlock) error {
 	defer util.LogExecutionTime(time.Now(), "ProcessBlock")
 
 	if block.Block == nil {
@@ -75,7 +75,7 @@ func (m *MonitorService) ProcessBlock(ctx context.Context, block *coretypes.Resu
 	return nil
 }
 
-func (m *MonitorService) ProcessTransaction(ctx context.Context, tx []byte, txIndex int, header *types.Header) error {
+func (m *ProcessorService) ProcessTransaction(ctx context.Context, tx []byte, txIndex int, header *types.Header) error {
 	defer util.LogExecutionTime(time.Now(), "ProcessTransaction")
 
 	if header == nil {
@@ -112,7 +112,7 @@ func (m *MonitorService) ProcessTransaction(ctx context.Context, tx []byte, txIn
 			return fmt.Errorf("failed to marshal message: %w", err)
 		}
 
-		err = m.kafkaClient.PublishAsync(ctx, txMsg.TypeUrl, jsonMessage)
+		err = m.streamingClient.PublishAsync(ctx, txMsg.TypeUrl, jsonMessage)
 		if err != nil {
 			return fmt.Errorf("failed to publish transaction message: %w", err)
 		}
@@ -122,8 +122,8 @@ func (m *MonitorService) ProcessTransaction(ctx context.Context, tx []byte, txIn
 	return nil
 }
 
-// ProcessBlockResults implements domain.MonitorService.
-func (m *MonitorService) ProcessBlockResults(ctx context.Context, blockResults *coretypes.ResultBlockResults, header *types.Header) error {
+// ProcessBlockResults implements domain.ProcessorService.
+func (m *ProcessorService) ProcessBlockResults(ctx context.Context, blockResults *coretypes.ResultBlockResults, header *types.Header) error {
 	defer util.LogExecutionTime(time.Now(), "ProcessBlockResults")
 
 	if blockResults == nil {
@@ -161,7 +161,7 @@ func (m *MonitorService) ProcessBlockResults(ctx context.Context, blockResults *
 	return nil
 }
 
-func (m *MonitorService) ProcessEvent(ctx context.Context, event *abci.Event, header *types.Header) error {
+func (m *ProcessorService) ProcessEvent(ctx context.Context, event *abci.Event, header *types.Header) error {
 	defer util.LogExecutionTime(time.Now(), "ProcessEvent")
 
 	if event == nil {
@@ -197,7 +197,7 @@ func (m *MonitorService) ProcessEvent(ctx context.Context, event *abci.Event, he
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
 
-	err = m.kafkaClient.PublishAsync(ctx, event.Type, jsonMessage)
+	err = m.streamingClient.PublishAsync(ctx, event.Type, jsonMessage)
 	if err != nil {
 		return fmt.Errorf("failed to publish event: %w", err)
 	}

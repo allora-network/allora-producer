@@ -8,14 +8,16 @@ const (
 	StatusFailed    string = "failed"
 )
 
-type ProcessedBlockTransactions struct {
+// ProcessedBlock is the model used to keep track of the processed blocks
+type ProcessedBlock struct {
 	ID          int64
 	Height      int64
 	ProcessedAt time.Time
 	Status      string
 }
 
-type ProcessedBlockEvents struct {
+// ProcessedBlockEvent is the model used to keep track of the processed block events
+type ProcessedBlockEvent struct {
 	ID          int64
 	Height      int64
 	ProcessedAt time.Time

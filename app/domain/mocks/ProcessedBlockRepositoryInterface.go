@@ -22,23 +22,23 @@ func (_m *ProcessedBlockRepositoryInterface) EXPECT() *ProcessedBlockRepositoryI
 	return &ProcessedBlockRepositoryInterface_Expecter{mock: &_m.Mock}
 }
 
-// GetLastProcessedBlockEvents provides a mock function with given fields: ctx
-func (_m *ProcessedBlockRepositoryInterface) GetLastProcessedBlockEvents(ctx context.Context) (domain.ProcessedBlockEvents, error) {
+// GetLastProcessedBlock provides a mock function with given fields: ctx
+func (_m *ProcessedBlockRepositoryInterface) GetLastProcessedBlock(ctx context.Context) (domain.ProcessedBlock, error) {
 	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetLastProcessedBlockEvents")
+		panic("no return value specified for GetLastProcessedBlock")
 	}
 
-	var r0 domain.ProcessedBlockEvents
+	var r0 domain.ProcessedBlock
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (domain.ProcessedBlockEvents, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) (domain.ProcessedBlock, error)); ok {
 		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) domain.ProcessedBlockEvents); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) domain.ProcessedBlock); ok {
 		r0 = rf(ctx)
 	} else {
-		r0 = ret.Get(0).(domain.ProcessedBlockEvents)
+		r0 = ret.Get(0).(domain.ProcessedBlock)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -50,51 +50,51 @@ func (_m *ProcessedBlockRepositoryInterface) GetLastProcessedBlockEvents(ctx con
 	return r0, r1
 }
 
-// ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLastProcessedBlockEvents'
-type ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call struct {
+// ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLastProcessedBlock'
+type ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call struct {
 	*mock.Call
 }
 
-// GetLastProcessedBlockEvents is a helper method to define mock.On call
+// GetLastProcessedBlock is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *ProcessedBlockRepositoryInterface_Expecter) GetLastProcessedBlockEvents(ctx interface{}) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call {
-	return &ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call{Call: _e.mock.On("GetLastProcessedBlockEvents", ctx)}
+func (_e *ProcessedBlockRepositoryInterface_Expecter) GetLastProcessedBlock(ctx interface{}) *ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call {
+	return &ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call{Call: _e.mock.On("GetLastProcessedBlock", ctx)}
 }
 
-func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call) Run(run func(ctx context.Context)) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call {
+func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call) Run(run func(ctx context.Context)) *ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context))
 	})
 	return _c
 }
 
-func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call) Return(_a0 domain.ProcessedBlockEvents, _a1 error) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call {
+func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call) Return(_a0 domain.ProcessedBlock, _a1 error) *ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call) RunAndReturn(run func(context.Context) (domain.ProcessedBlockEvents, error)) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvents_Call {
+func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call) RunAndReturn(run func(context.Context) (domain.ProcessedBlock, error)) *ProcessedBlockRepositoryInterface_GetLastProcessedBlock_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetLastProcessedBlockTransactions provides a mock function with given fields: ctx
-func (_m *ProcessedBlockRepositoryInterface) GetLastProcessedBlockTransactions(ctx context.Context) (domain.ProcessedBlockTransactions, error) {
+// GetLastProcessedBlockEvent provides a mock function with given fields: ctx
+func (_m *ProcessedBlockRepositoryInterface) GetLastProcessedBlockEvent(ctx context.Context) (domain.ProcessedBlockEvent, error) {
 	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetLastProcessedBlockTransactions")
+		panic("no return value specified for GetLastProcessedBlockEvent")
 	}
 
-	var r0 domain.ProcessedBlockTransactions
+	var r0 domain.ProcessedBlockEvent
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) (domain.ProcessedBlockTransactions, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) (domain.ProcessedBlockEvent, error)); ok {
 		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) domain.ProcessedBlockTransactions); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) domain.ProcessedBlockEvent); ok {
 		r0 = rf(ctx)
 	} else {
-		r0 = ret.Get(0).(domain.ProcessedBlockTransactions)
+		r0 = ret.Get(0).(domain.ProcessedBlockEvent)
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -106,91 +106,44 @@ func (_m *ProcessedBlockRepositoryInterface) GetLastProcessedBlockTransactions(c
 	return r0, r1
 }
 
-// ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLastProcessedBlockTransactions'
-type ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call struct {
+// ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLastProcessedBlockEvent'
+type ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call struct {
 	*mock.Call
 }
 
-// GetLastProcessedBlockTransactions is a helper method to define mock.On call
+// GetLastProcessedBlockEvent is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *ProcessedBlockRepositoryInterface_Expecter) GetLastProcessedBlockTransactions(ctx interface{}) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call {
-	return &ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call{Call: _e.mock.On("GetLastProcessedBlockTransactions", ctx)}
+func (_e *ProcessedBlockRepositoryInterface_Expecter) GetLastProcessedBlockEvent(ctx interface{}) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call {
+	return &ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call{Call: _e.mock.On("GetLastProcessedBlockEvent", ctx)}
 }
 
-func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call) Run(run func(ctx context.Context)) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call {
+func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call) Run(run func(ctx context.Context)) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context))
 	})
 	return _c
 }
 
-func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call) Return(_a0 domain.ProcessedBlockTransactions, _a1 error) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call {
+func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call) Return(_a0 domain.ProcessedBlockEvent, _a1 error) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call) RunAndReturn(run func(context.Context) (domain.ProcessedBlockTransactions, error)) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockTransactions_Call {
+func (_c *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call) RunAndReturn(run func(context.Context) (domain.ProcessedBlockEvent, error)) *ProcessedBlockRepositoryInterface_GetLastProcessedBlockEvent_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// SaveProcessedBlockEvents provides a mock function with given fields: ctx, blockEvent
-func (_m *ProcessedBlockRepositoryInterface) SaveProcessedBlockEvents(ctx context.Context, blockEvent domain.ProcessedBlockEvents) error {
-	ret := _m.Called(ctx, blockEvent)
-
-	if len(ret) == 0 {
-		panic("no return value specified for SaveProcessedBlockEvents")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ProcessedBlockEvents) error); ok {
-		r0 = rf(ctx, blockEvent)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveProcessedBlockEvents'
-type ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call struct {
-	*mock.Call
-}
-
-// SaveProcessedBlockEvents is a helper method to define mock.On call
-//   - ctx context.Context
-//   - blockEvent domain.ProcessedBlockEvents
-func (_e *ProcessedBlockRepositoryInterface_Expecter) SaveProcessedBlockEvents(ctx interface{}, blockEvent interface{}) *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call {
-	return &ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call{Call: _e.mock.On("SaveProcessedBlockEvents", ctx, blockEvent)}
-}
-
-func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call) Run(run func(ctx context.Context, blockEvent domain.ProcessedBlockEvents)) *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(domain.ProcessedBlockEvents))
-	})
-	return _c
-}
-
-func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call) Return(_a0 error) *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call) RunAndReturn(run func(context.Context, domain.ProcessedBlockEvents) error) *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvents_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// SaveProcessedBlockTransactions provides a mock function with given fields: ctx, block
-func (_m *ProcessedBlockRepositoryInterface) SaveProcessedBlockTransactions(ctx context.Context, block domain.ProcessedBlockTransactions) error {
+// SaveProcessedBlock provides a mock function with given fields: ctx, block
+func (_m *ProcessedBlockRepositoryInterface) SaveProcessedBlock(ctx context.Context, block domain.ProcessedBlock) error {
 	ret := _m.Called(ctx, block)
 
 	if len(ret) == 0 {
-		panic("no return value specified for SaveProcessedBlockTransactions")
+		panic("no return value specified for SaveProcessedBlock")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, domain.ProcessedBlockTransactions) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ProcessedBlock) error); ok {
 		r0 = rf(ctx, block)
 	} else {
 		r0 = ret.Error(0)
@@ -199,31 +152,78 @@ func (_m *ProcessedBlockRepositoryInterface) SaveProcessedBlockTransactions(ctx 
 	return r0
 }
 
-// ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveProcessedBlockTransactions'
-type ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call struct {
+// ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveProcessedBlock'
+type ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call struct {
 	*mock.Call
 }
 
-// SaveProcessedBlockTransactions is a helper method to define mock.On call
+// SaveProcessedBlock is a helper method to define mock.On call
 //   - ctx context.Context
-//   - block domain.ProcessedBlockTransactions
-func (_e *ProcessedBlockRepositoryInterface_Expecter) SaveProcessedBlockTransactions(ctx interface{}, block interface{}) *ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call {
-	return &ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call{Call: _e.mock.On("SaveProcessedBlockTransactions", ctx, block)}
+//   - block domain.ProcessedBlock
+func (_e *ProcessedBlockRepositoryInterface_Expecter) SaveProcessedBlock(ctx interface{}, block interface{}) *ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call {
+	return &ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call{Call: _e.mock.On("SaveProcessedBlock", ctx, block)}
 }
 
-func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call) Run(run func(ctx context.Context, block domain.ProcessedBlockTransactions)) *ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call {
+func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call) Run(run func(ctx context.Context, block domain.ProcessedBlock)) *ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(domain.ProcessedBlockTransactions))
+		run(args[0].(context.Context), args[1].(domain.ProcessedBlock))
 	})
 	return _c
 }
 
-func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call) Return(_a0 error) *ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call {
+func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call) Return(_a0 error) *ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call) RunAndReturn(run func(context.Context, domain.ProcessedBlockTransactions) error) *ProcessedBlockRepositoryInterface_SaveProcessedBlockTransactions_Call {
+func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call) RunAndReturn(run func(context.Context, domain.ProcessedBlock) error) *ProcessedBlockRepositoryInterface_SaveProcessedBlock_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SaveProcessedBlockEvent provides a mock function with given fields: ctx, blockEvent
+func (_m *ProcessedBlockRepositoryInterface) SaveProcessedBlockEvent(ctx context.Context, blockEvent domain.ProcessedBlockEvent) error {
+	ret := _m.Called(ctx, blockEvent)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveProcessedBlockEvent")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, domain.ProcessedBlockEvent) error); ok {
+		r0 = rf(ctx, blockEvent)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveProcessedBlockEvent'
+type ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call struct {
+	*mock.Call
+}
+
+// SaveProcessedBlockEvent is a helper method to define mock.On call
+//   - ctx context.Context
+//   - blockEvent domain.ProcessedBlockEvent
+func (_e *ProcessedBlockRepositoryInterface_Expecter) SaveProcessedBlockEvent(ctx interface{}, blockEvent interface{}) *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call {
+	return &ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call{Call: _e.mock.On("SaveProcessedBlockEvent", ctx, blockEvent)}
+}
+
+func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call) Run(run func(ctx context.Context, blockEvent domain.ProcessedBlockEvent)) *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(domain.ProcessedBlockEvent))
+	})
+	return _c
+}
+
+func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call) Return(_a0 error) *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call) RunAndReturn(run func(context.Context, domain.ProcessedBlockEvent) error) *ProcessedBlockRepositoryInterface_SaveProcessedBlockEvent_Call {
 	_c.Call.Return(run)
 	return _c
 }

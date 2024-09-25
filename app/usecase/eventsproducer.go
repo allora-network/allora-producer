@@ -8,12 +8,14 @@ import (
 	"github.com/allora-network/allora-producer/app/domain"
 )
 
-type MonitorEvents struct {
-	BaseMonitor
+type EventsProducer struct {
+	BaseProducer
 }
 
-func NewMonitorEvents(service domain.MonitorService, client domain.AlloraClientInterface, repository domain.ProcessedBlockRepositoryInterface,
-	startHeight int64, blockRefreshInterval time.Duration, rateLimitInterval time.Duration) (*MonitorEvents, error) {
+var _ domain.EventsProducer = &EventsProducer{}
+
+func NewEventsProducer(service domain.ProcessorService, client domain.AlloraClientInterface, repository domain.ProcessedBlockRepositoryInterface,
+	startHeight int64, blockRefreshInterval time.Duration, rateLimitInterval time.Duration) (*EventsProducer, error) {
 	if service == nil {
 		return nil, fmt.Errorf("service is nil")
 	}
@@ -24,8 +26,8 @@ func NewMonitorEvents(service domain.MonitorService, client domain.AlloraClientI
 		return nil, fmt.Errorf("repository is nil")
 	}
 
-	return &MonitorEvents{
-		BaseMonitor: BaseMonitor{
+	return &EventsProducer{
+		BaseProducer: BaseProducer{
 			service:              service,
 			client:               client,
 			repository:           repository,
@@ -36,7 +38,7 @@ func NewMonitorEvents(service domain.MonitorService, client domain.AlloraClientI
 	}, nil
 }
 
-func (m *MonitorEvents) Execute(ctx context.Context) error {
+func (m *EventsProducer) Execute(ctx context.Context) error {
 	if err := m.InitStartHeight(ctx); err != nil {
 		return err
 	}
@@ -44,7 +46,7 @@ func (m *MonitorEvents) Execute(ctx context.Context) error {
 	return m.MonitorLoop(ctx, m.processBlockResults)
 }
 
-func (m *MonitorEvents) processBlockResults(ctx context.Context, height int64) error {
+func (m *EventsProducer) processBlockResults(ctx context.Context, height int64) error {
 	// Fetch BlockResults
 	blockResults, err := m.client.GetBlockResults(ctx, height)
 	if err != nil {

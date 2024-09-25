@@ -9,8 +9,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type BaseMonitor struct {
-	service              domain.MonitorService
+type BaseProducer struct {
+	service              domain.ProcessorService
 	client               domain.AlloraClientInterface
 	repository           domain.ProcessedBlockRepositoryInterface
 	startHeight          int64
@@ -19,7 +19,7 @@ type BaseMonitor struct {
 }
 
 // InitStartHeight checks if the start height is zero and fetches the latest block height.
-func (bm *BaseMonitor) InitStartHeight(ctx context.Context) error {
+func (bm *BaseProducer) InitStartHeight(ctx context.Context) error {
 	if bm.startHeight == 0 {
 		latestHeight, err := bm.client.GetLatestBlockHeight(ctx)
 		if err != nil {
@@ -30,8 +30,8 @@ func (bm *BaseMonitor) InitStartHeight(ctx context.Context) error {
 	return nil
 }
 
-// MonitorLoop allows each specific monitor to define how it processes blocks or block results.
-func (bm *BaseMonitor) MonitorLoop(ctx context.Context, processBlock func(ctx context.Context, height int64) error) error {
+// MonitorLoop allows each specific producer to define how it processes blocks or block results.
+func (bm *BaseProducer) MonitorLoop(ctx context.Context, processBlock func(ctx context.Context, height int64) error) error {
 	for {
 		// Check for context cancellation
 		select {

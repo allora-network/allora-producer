@@ -4,10 +4,10 @@ import "context"
 
 //go:generate mockery --all
 
-type MonitorTransactionsUseCase interface {
+type EventsProducer interface {
 	Execute(ctx context.Context) error
 }
 
-type MonitorEventsUseCase interface {
+type TransactionsProducer interface {
 	Execute(ctx context.Context) error
 }

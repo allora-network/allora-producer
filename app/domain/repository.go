@@ -52,9 +52,9 @@ type CodecInterface interface {
 }
 
 type ProcessedBlockRepositoryInterface interface {
-	GetLastProcessedBlockTransactions(ctx context.Context) (ProcessedBlockTransactions, error)
-	SaveProcessedBlockTransactions(ctx context.Context, block ProcessedBlockTransactions) error
+	GetLastProcessedBlock(ctx context.Context) (ProcessedBlock, error)
+	SaveProcessedBlock(ctx context.Context, block ProcessedBlock) error
 
-	GetLastProcessedBlockEvents(ctx context.Context) (ProcessedBlockEvents, error)
-	SaveProcessedBlockEvents(ctx context.Context, blockEvent ProcessedBlockEvents) error
+	GetLastProcessedBlockEvent(ctx context.Context) (ProcessedBlockEvent, error)
+	SaveProcessedBlockEvent(ctx context.Context, blockEvent ProcessedBlockEvent) error
 }

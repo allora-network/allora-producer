@@ -29,8 +29,8 @@ type pgProcessedBlock struct {
 var _ domain.ProcessedBlockRepositoryInterface = &pgProcessedBlock{}
 
 const (
-	tableProcessedBlockTransactions = "processed_block_transactions"
-	tableProcessedBlockEvents       = "processed_block_events"
+	tableProcessedBlocks      = "processed_blocks"
+	tableProcessedBlockEvents = "processed_block_events"
 )
 
 // NewPgProcessedBlock creates a new instance of pgProcessedBlock
@@ -42,23 +42,23 @@ func NewPgProcessedBlock(db DBPool) (domain.ProcessedBlockRepositoryInterface, e
 }
 
 // GetLastProcessedBlock retrieves the last processed block from the database
-func (p *pgProcessedBlock) GetLastProcessedBlockTransactions(ctx context.Context) (domain.ProcessedBlockTransactions, error) {
-	query := fmt.Sprintf("SELECT * FROM %s ORDER BY height DESC LIMIT 1", tableProcessedBlockTransactions)
-	var block domain.ProcessedBlockTransactions
+func (p *pgProcessedBlock) GetLastProcessedBlock(ctx context.Context) (domain.ProcessedBlock, error) {
+	query := fmt.Sprintf("SELECT * FROM %s ORDER BY height DESC LIMIT 1", tableProcessedBlocks)
+	var block domain.ProcessedBlock
 	err := p.db.QueryRow(ctx, query).Scan(&block)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			// Handle the case where there are no rows in the table
-			return domain.ProcessedBlockTransactions{}, nil
+			return domain.ProcessedBlock{}, nil
 		}
-		return domain.ProcessedBlockTransactions{}, fmt.Errorf("failed to get last processed block: %w", err)
+		return domain.ProcessedBlock{}, fmt.Errorf("failed to get last processed block: %w", err)
 	}
 	return block, nil
 }
 
 // SaveProcessedBlock saves a processed block to the database
-func (p *pgProcessedBlock) SaveProcessedBlockTransactions(ctx context.Context, block domain.ProcessedBlockTransactions) error {
-	query := fmt.Sprintf("INSERT INTO %s (height, processed_at, status) VALUES ($1, $2, $3)", tableProcessedBlockTransactions)
+func (p *pgProcessedBlock) SaveProcessedBlock(ctx context.Context, block domain.ProcessedBlock) error {
+	query := fmt.Sprintf("INSERT INTO %s (height, processed_at, status) VALUES ($1, $2, $3)", tableProcessedBlocks)
 	_, err := p.db.Exec(ctx, query, block.Height, block.ProcessedAt, block.Status)
 	if err != nil {
 		return fmt.Errorf("failed to save processed block: %w", err)
@@ -67,20 +67,20 @@ func (p *pgProcessedBlock) SaveProcessedBlockTransactions(ctx context.Context, b
 }
 
 // GetProcessedBlockEvent retrieves a processed block event from the database
-func (p *pgProcessedBlock) GetLastProcessedBlockEvents(ctx context.Context) (domain.ProcessedBlockEvents, error) {
+func (p *pgProcessedBlock) GetLastProcessedBlockEvent(ctx context.Context) (domain.ProcessedBlockEvent, error) {
 	query := fmt.Sprintf("SELECT * FROM %s ORDER BY height DESC LIMIT 1", tableProcessedBlockEvents)
-	var event domain.ProcessedBlockEvents
+	var event domain.ProcessedBlockEvent
 	err := p.db.QueryRow(ctx, query).Scan(&event)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return domain.ProcessedBlockEvents{}, nil
+			return domain.ProcessedBlockEvent{}, nil
 		}
-		return domain.ProcessedBlockEvents{}, fmt.Errorf("failed to get processed block event: %w", err)
+		return domain.ProcessedBlockEvent{}, fmt.Errorf("failed to get processed block event: %w", err)
 	}
 	return event, nil
 }
 
-func (p *pgProcessedBlock) SaveProcessedBlockEvents(ctx context.Context, event domain.ProcessedBlockEvents) error {
+func (p *pgProcessedBlock) SaveProcessedBlockEvent(ctx context.Context, event domain.ProcessedBlockEvent) error {
 	query := fmt.Sprintf("INSERT INTO %s (height, processed_at, status) VALUES ($1, $2, $3)", tableProcessedBlockEvents)
 	_, err := p.db.Exec(ctx, query, event.Height, event.ProcessedAt, event.Status)
 	if err != nil {

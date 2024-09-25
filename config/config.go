@@ -10,7 +10,7 @@ type Config struct {
 	FilterEvent       FilterEventConfig        `mapstructure:"filter_event" validate:"required"`
 	FilterTransaction FilterTransactionConfig  `mapstructure:"filter_transaction" validate:"required"`
 	Log               LogConfig                `mapstructure:"log" validate:"required"`
-	Monitor           MonitorConfig            `mapstructure:"monitor" validate:"required"`
+	Producer          ProducerConfig           `mapstructure:"producer" validate:"required"`
 }
 
 type KafkaConfig struct {
@@ -45,7 +45,7 @@ type LogConfig struct {
 	Level int8 `mapstructure:"level" validate:"required"` // Log level
 }
 
-type MonitorConfig struct {
+type ProducerConfig struct {
 	BlockRefreshInterval time.Duration `mapstructure:"block_refresh_interval" validate:"required"` // Block refresh interval
 	RateLimitInterval    time.Duration `mapstructure:"rate_limit_interval" validate:"required"`    // Rate limit interval
 }

@@ -17,14 +17,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Test MonitorService.ProcessBlock
-func TestMonitorService_ProcessBlock(t *testing.T) {
+// Test ProcessorService.ProcessBlock
+func TestProcessorService_ProcessBlock(t *testing.T) {
 	mockKafka := new(mocks.StreamingClient)
 	mockCodec := new(mocks.CodecInterface)
 	mockEventFilter := new(mocks.FilterInterface[abcitypes.Event])
 	mockTxFilter := new(mocks.FilterInterface[codectypes.Any])
 
-	service, err := NewMonitorService(mockKafka, mockCodec, mockEventFilter, mockTxFilter)
+	service, err := NewProcessorService(mockKafka, mockCodec, mockEventFilter, mockTxFilter)
 	require.NoError(t, err)
 
 	block := &coretypes.ResultBlock{
@@ -68,14 +68,14 @@ func TestMonitorService_ProcessBlock(t *testing.T) {
 	mockTxFilter.AssertExpectations(t)
 }
 
-// Test MonitorService.ProcessTransaction
-func TestMonitorService_ProcessTransaction(t *testing.T) {
+// Test ProcessorService.ProcessTransaction
+func TestProcessorService_ProcessTransaction(t *testing.T) {
 	mockKafka := new(mocks.StreamingClient)
 	mockCodec := new(mocks.CodecInterface)
 	mockEventFilter := new(mocks.FilterInterface[abcitypes.Event])
 	mockTxFilter := new(mocks.FilterInterface[codectypes.Any])
 
-	service, err := NewMonitorService(mockKafka, mockCodec, mockEventFilter, mockTxFilter)
+	service, err := NewProcessorService(mockKafka, mockCodec, mockEventFilter, mockTxFilter)
 	require.NoError(t, err)
 
 	tx := []byte("tx")
@@ -106,14 +106,14 @@ func TestMonitorService_ProcessTransaction(t *testing.T) {
 	mockTxFilter.AssertExpectations(t)
 }
 
-// Test MonitorService.ProcessEvent
-func TestMonitorService_ProcessEvent(t *testing.T) {
+// Test ProcessorService.ProcessEvent
+func TestProcessorService_ProcessEvent(t *testing.T) {
 	mockKafka := new(mocks.StreamingClient)
 	mockCodec := new(mocks.CodecInterface)
 	mockEventFilter := new(mocks.FilterInterface[abcitypes.Event])
 	mockTxFilter := new(mocks.FilterInterface[codectypes.Any])
 
-	service, err := NewMonitorService(mockKafka, mockCodec, mockEventFilter, mockTxFilter)
+	service, err := NewProcessorService(mockKafka, mockCodec, mockEventFilter, mockTxFilter)
 	require.NoError(t, err)
 
 	event := &abcitypes.Event{
@@ -143,14 +143,14 @@ func TestMonitorService_ProcessEvent(t *testing.T) {
 	mockEventFilter.AssertExpectations(t)
 }
 
-// Test MonitorService.ProcessBlockResults
-func TestMonitorService_ProcessBlockResults(t *testing.T) {
+// Test ProcessorService.ProcessBlockResults
+func TestProcessorService_ProcessBlockResults(t *testing.T) {
 	mockKafka := new(mocks.StreamingClient)
 	mockCodec := new(mocks.CodecInterface)
 	mockEventFilter := new(mocks.FilterInterface[abcitypes.Event])
 	mockTxFilter := new(mocks.FilterInterface[codectypes.Any])
 
-	service, err := NewMonitorService(mockKafka, mockCodec, mockEventFilter, mockTxFilter)
+	service, err := NewProcessorService(mockKafka, mockCodec, mockEventFilter, mockTxFilter)
 	require.NoError(t, err)
 
 	blockResults := &coretypes.ResultBlockResults{

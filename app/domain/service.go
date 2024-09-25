@@ -9,7 +9,7 @@ import (
 
 //go:generate mockery --all
 
-type MonitorService interface {
+type ProcessorService interface {
 	ProcessBlock(ctx context.Context, block *ctypes.ResultBlock) error
 	ProcessBlockResults(ctx context.Context, blockResults *ctypes.ResultBlockResults, header *types.Header) error
 }

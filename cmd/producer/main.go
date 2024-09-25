@@ -83,20 +83,20 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to create processed block repository")
 	}
 
-	monitorService, err := service.NewMonitorService(kafkaClient, codec, eventFilter, transactionMessageFilter)
+	processorService, err := service.NewProcessorService(kafkaClient, codec, eventFilter, transactionMessageFilter)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create monitor service")
+		log.Fatal().Err(err).Msg("failed to create processor service")
 	}
-	monitorEventsUseCase, err := usecase.NewMonitorEvents(monitorService, alloraClient, processedBlockRepository, 0, cfg.Monitor.BlockRefreshInterval, cfg.Monitor.RateLimitInterval)
+	eventsProducer, err := usecase.NewEventsProducer(processorService, alloraClient, processedBlockRepository, 0, cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create monitor events use case")
+		log.Fatal().Err(err).Msg("failed to create events producer use case")
 	}
-	monitorTransactionsUseCase, err := usecase.NewMonitorTransactions(monitorService, alloraClient, processedBlockRepository, 0, cfg.Monitor.BlockRefreshInterval, cfg.Monitor.RateLimitInterval)
+	transactionsProducer, err := usecase.NewTransactionsProducer(processorService, alloraClient, processedBlockRepository, 0, cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create monitor transactions use case")
+		log.Fatal().Err(err).Msg("failed to create transactions producer use case")
 	}
 
-	app := app.NewApp(monitorEventsUseCase, monitorTransactionsUseCase)
+	app := app.NewApp(eventsProducer, transactionsProducer)
 
 	if err := app.Run(ctx); err != nil {
 		log.Fatal().Err(err).Msg("failed to run app")
