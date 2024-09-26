@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/allora-network/allora-producer/app/domain"
+	"github.com/rs/zerolog/log"
 )
 
 type TransactionsProducer struct {
@@ -15,7 +16,7 @@ type TransactionsProducer struct {
 var _ domain.TransactionsProducer = &TransactionsProducer{}
 
 func NewTransactionsProducer(service domain.ProcessorService, client domain.AlloraClientInterface, repository domain.ProcessedBlockRepositoryInterface,
-	startHeight int64, blockRefreshInterval time.Duration, rateLimitInterval time.Duration) (*TransactionsProducer, error) {
+	startHeight int64, blockRefreshInterval time.Duration, rateLimitInterval time.Duration, numWorkers int) (*TransactionsProducer, error) {
 	if service == nil {
 		return nil, fmt.Errorf("service is nil")
 	}
@@ -26,14 +27,18 @@ func NewTransactionsProducer(service domain.ProcessorService, client domain.Allo
 		return nil, fmt.Errorf("repository is nil")
 	}
 
+	logger := log.With().Str("producer", "transactions").Logger()
+
 	return &TransactionsProducer{
 		BaseProducer: BaseProducer{
 			service:              service,
-			client:               client,
+			alloraClient:         client,
 			repository:           repository,
 			startHeight:          startHeight,
 			blockRefreshInterval: blockRefreshInterval,
 			rateLimitInterval:    rateLimitInterval,
+			numWorkers:           numWorkers,
+			logger:               &logger,
 		},
 	}, nil
 }
@@ -43,12 +48,13 @@ func (m *TransactionsProducer) Execute(ctx context.Context) error {
 		return err
 	}
 
-	return m.MonitorLoop(ctx, m.processBlock)
+	return m.MonitorLoopParallel(ctx, m.processBlock, m.numWorkers)
 }
 
 func (m *TransactionsProducer) processBlock(ctx context.Context, height int64) error {
+	m.logger.Debug().Msgf("Processing block for height %d", height)
 	// Fetch Block
-	block, err := m.client.GetBlockByHeight(ctx, height)
+	block, err := m.alloraClient.GetBlockByHeight(ctx, height)
 	if err != nil {
 		return fmt.Errorf("failed to get block for height %d: %w", height, err)
 	}

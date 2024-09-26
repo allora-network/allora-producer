@@ -17,6 +17,7 @@ log:
 producer:
   block_refresh_interval: 5s
   rate_limit_interval: 1s
+  num_workers: 5
 
 kafka_topic_router:
   - name: "topic.staking"

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/allora-network/allora-producer/app/domain"
+	"github.com/rs/zerolog/log"
 )
 
 type EventsProducer struct {
@@ -15,7 +16,7 @@ type EventsProducer struct {
 var _ domain.EventsProducer = &EventsProducer{}
 
 func NewEventsProducer(service domain.ProcessorService, client domain.AlloraClientInterface, repository domain.ProcessedBlockRepositoryInterface,
-	startHeight int64, blockRefreshInterval time.Duration, rateLimitInterval time.Duration) (*EventsProducer, error) {
+	startHeight int64, blockRefreshInterval time.Duration, rateLimitInterval time.Duration, numWorkers int) (*EventsProducer, error) {
 	if service == nil {
 		return nil, fmt.Errorf("service is nil")
 	}
@@ -26,14 +27,18 @@ func NewEventsProducer(service domain.ProcessorService, client domain.AlloraClie
 		return nil, fmt.Errorf("repository is nil")
 	}
 
+	logger := log.With().Str("producer", "events").Logger()
+
 	return &EventsProducer{
 		BaseProducer: BaseProducer{
 			service:              service,
-			client:               client,
+			alloraClient:         client,
 			repository:           repository,
 			startHeight:          startHeight,
 			blockRefreshInterval: blockRefreshInterval,
 			rateLimitInterval:    rateLimitInterval,
+			numWorkers:           numWorkers,
+			logger:               &logger,
 		},
 	}, nil
 }
@@ -43,18 +48,19 @@ func (m *EventsProducer) Execute(ctx context.Context) error {
 		return err
 	}
 
-	return m.MonitorLoop(ctx, m.processBlockResults)
+	return m.MonitorLoopParallel(ctx, m.processBlockResults, m.numWorkers)
 }
 
 func (m *EventsProducer) processBlockResults(ctx context.Context, height int64) error {
+	m.logger.Debug().Msgf("Processing block results for height %d", height)
 	// Fetch BlockResults
-	blockResults, err := m.client.GetBlockResults(ctx, height)
+	blockResults, err := m.alloraClient.GetBlockResults(ctx, height)
 	if err != nil {
 		return fmt.Errorf("failed to get block results for height %d: %w", height, err)
 	}
 
 	// Fetch the Header separately
-	header, err := m.client.GetHeader(ctx, height)
+	header, err := m.alloraClient.GetHeader(ctx, height)
 	if err != nil {
 		return fmt.Errorf("failed to get block header for height %d: %w", height, err)
 	}

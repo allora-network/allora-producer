@@ -38,14 +38,15 @@ type FilterEventConfig struct {
 }
 
 type FilterTransactionConfig struct {
-	Types []string `mapstructure:"types" validate:"required,gt=0,dive,min=1"` // Types of transactions to filter
+	Types []string `mapstructure:"types" validate:"gt=0,dive,min=1"` // Types of transactions to filter
 }
 
 type LogConfig struct {
-	Level int8 `mapstructure:"level" validate:"required"` // Log level
+	Level int8 `mapstructure:"level" validate:"gte=-1,lte=7"` // Log level
 }
 
 type ProducerConfig struct {
 	BlockRefreshInterval time.Duration `mapstructure:"block_refresh_interval" validate:"required"` // Block refresh interval
 	RateLimitInterval    time.Duration `mapstructure:"rate_limit_interval" validate:"required"`    // Rate limit interval
+	NumWorkers           int           `mapstructure:"num_workers" validate:"required,gt=0"`       // Number of workers to process blocks and block results
 }

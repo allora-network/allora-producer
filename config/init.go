@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -34,4 +35,9 @@ func InitConfig() (Config, error) {
 
 	log.Info().Msg("Configuration loaded successfully")
 	return cfg, nil
+}
+
+func ValidateConfig(cfg *Config) error {
+	validate := validator.New()
+	return validate.Struct(cfg)
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/allora-network/allora-producer/app/usecase"
 	"github.com/allora-network/allora-producer/codec"
 	"github.com/allora-network/allora-producer/infra"
-	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/allora-network/allora-producer/config"
@@ -30,7 +29,7 @@ func main() {
 	zerolog.SetGlobalLevel(zerolog.Level(cfg.Log.Level))
 
 	// Validate config
-	if err := validateConfig(&cfg); err != nil {
+	if err := config.ValidateConfig(&cfg); err != nil {
 		log.Fatal().Err(err).Msg("invalid config")
 	}
 
@@ -87,11 +86,13 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create processor service")
 	}
-	eventsProducer, err := usecase.NewEventsProducer(processorService, alloraClient, processedBlockRepository, 0, cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval)
+	eventsProducer, err := usecase.NewEventsProducer(processorService, alloraClient, processedBlockRepository, 0,
+		cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval, cfg.Producer.NumWorkers)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create events producer use case")
 	}
-	transactionsProducer, err := usecase.NewTransactionsProducer(processorService, alloraClient, processedBlockRepository, 0, cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval)
+	transactionsProducer, err := usecase.NewTransactionsProducer(processorService, alloraClient, processedBlockRepository, 0,
+		cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval, cfg.Producer.NumWorkers)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create transactions producer use case")
 	}
@@ -101,11 +102,6 @@ func main() {
 	if err := app.Run(ctx); err != nil {
 		log.Fatal().Err(err).Msg("failed to run app")
 	}
-}
-
-func validateConfig(cfg *config.Config) error {
-	validate := validator.New()
-	return validate.Struct(cfg)
 }
 
 func getTopicMapping(cfg config.Config) map[string]string {

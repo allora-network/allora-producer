@@ -21,6 +21,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /home/appuser/
 
 COPY --from=builder /app/allora-producer .
+COPY --from=builder /app/config/config.yaml .
 
 USER appuser
 
