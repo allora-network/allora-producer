@@ -56,7 +56,7 @@ func TestProcessorService_ProcessBlock(t *testing.T) {
 	mockCodec.On("ParseTx", []byte("tx1")).Return(parsedTx, nil)
 	mockTxFilter.On("ShouldProcess", parsedTx.Body.Messages[0]).Return(true)
 	mockCodec.On("MarshalProtoJSON", parsedTx.Body.Messages[0]).Return(json.RawMessage(`{"key":"value"}`), nil)
-	mockKafka.On("PublishAsync", mock.Anything, "/test.Msg", mock.Anything).Return(nil)
+	mockKafka.On("PublishAsync", mock.Anything, "/test.Msg", mock.Anything, mock.Anything).Return(nil)
 	mockCodec.On("ParseTx", []byte("tx2")).Return(nil, errors.New("parse error"))
 
 	err = service.ProcessBlock(context.Background(), block)
@@ -96,7 +96,7 @@ func TestProcessorService_ProcessTransaction(t *testing.T) {
 	mockCodec.On("ParseTx", tx).Return(parsedTx, nil)
 	mockTxFilter.On("ShouldProcess", parsedTx.Body.Messages[0]).Return(true)
 	mockCodec.On("MarshalProtoJSON", parsedTx.Body.Messages[0]).Return(json.RawMessage(`{"key":"value"}`), nil)
-	mockKafka.On("PublishAsync", mock.Anything, "/test.Msg", mock.Anything).Return(nil)
+	mockKafka.On("PublishAsync", mock.Anything, "/test.Msg", mock.Anything, mock.Anything).Return(nil)
 
 	err = service.ProcessTransaction(context.Background(), tx, 0, header)
 	require.NoError(t, err)
@@ -133,7 +133,7 @@ func TestProcessorService_ProcessEvent(t *testing.T) {
 	mockEventFilter.On("ShouldProcess", event).Return(true)
 	mockCodec.On("ParseEvent", event).Return(parsedEvent, nil)
 	mockCodec.On("MarshalProtoJSON", parsedEvent).Return(json.RawMessage(`{"event":"data"}`), nil)
-	mockKafka.On("PublishAsync", mock.Anything, "test_event", mock.Anything).Return(nil)
+	mockKafka.On("PublishAsync", mock.Anything, "test_event", mock.Anything, mock.Anything).Return(nil)
 
 	err = service.ProcessEvent(context.Background(), event, header)
 	require.NoError(t, err)
@@ -202,12 +202,12 @@ func TestProcessorService_ProcessBlockResults(t *testing.T) {
 	mockEventFilter.On("ShouldProcess", event1).Return(true)
 	mockCodec.On("ParseEvent", event1).Return(parsedEvent1, nil)
 	mockCodec.On("MarshalProtoJSON", parsedEvent1).Return(json.RawMessage(`{"event":"tx_event"}`), nil)
-	mockKafka.On("PublishAsync", mock.Anything, "tx_event", mock.Anything).Return(nil)
+	mockKafka.On("PublishAsync", mock.Anything, "tx_event", mock.Anything, mock.Anything).Return(nil)
 
 	mockEventFilter.On("ShouldProcess", event2).Return(true)
 	mockCodec.On("ParseEvent", event2).Return(parsedEvent2, nil)
 	mockCodec.On("MarshalProtoJSON", parsedEvent2).Return(json.RawMessage(`{"event":"finalize_event"}`), nil)
-	mockKafka.On("PublishAsync", mock.Anything, "finalize_event", mock.Anything).Return(nil)
+	mockKafka.On("PublishAsync", mock.Anything, "finalize_event", mock.Anything, mock.Anything).Return(nil)
 
 	err = service.ProcessBlockResults(context.Background(), blockResults, header)
 	require.NoError(t, err)

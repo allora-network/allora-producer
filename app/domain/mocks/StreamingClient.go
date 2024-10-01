@@ -66,17 +66,17 @@ func (_c *StreamingClient_Close_Call) RunAndReturn(run func() error) *StreamingC
 	return _c
 }
 
-// PublishAsync provides a mock function with given fields: ctx, msgType, message
-func (_m *StreamingClient) PublishAsync(ctx context.Context, msgType string, message []byte) error {
-	ret := _m.Called(ctx, msgType, message)
+// PublishAsync provides a mock function with given fields: ctx, msgType, message, blockHeight
+func (_m *StreamingClient) PublishAsync(ctx context.Context, msgType string, message []byte, blockHeight int64) error {
+	ret := _m.Called(ctx, msgType, message, blockHeight)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PublishAsync")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, []byte) error); ok {
-		r0 = rf(ctx, msgType, message)
+	if rf, ok := ret.Get(0).(func(context.Context, string, []byte, int64) error); ok {
+		r0 = rf(ctx, msgType, message, blockHeight)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -93,13 +93,14 @@ type StreamingClient_PublishAsync_Call struct {
 //   - ctx context.Context
 //   - msgType string
 //   - message []byte
-func (_e *StreamingClient_Expecter) PublishAsync(ctx interface{}, msgType interface{}, message interface{}) *StreamingClient_PublishAsync_Call {
-	return &StreamingClient_PublishAsync_Call{Call: _e.mock.On("PublishAsync", ctx, msgType, message)}
+//   - blockHeight int64
+func (_e *StreamingClient_Expecter) PublishAsync(ctx interface{}, msgType interface{}, message interface{}, blockHeight interface{}) *StreamingClient_PublishAsync_Call {
+	return &StreamingClient_PublishAsync_Call{Call: _e.mock.On("PublishAsync", ctx, msgType, message, blockHeight)}
 }
 
-func (_c *StreamingClient_PublishAsync_Call) Run(run func(ctx context.Context, msgType string, message []byte)) *StreamingClient_PublishAsync_Call {
+func (_c *StreamingClient_PublishAsync_Call) Run(run func(ctx context.Context, msgType string, message []byte, blockHeight int64)) *StreamingClient_PublishAsync_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].([]byte))
+		run(args[0].(context.Context), args[1].(string), args[2].([]byte), args[3].(int64))
 	})
 	return _c
 }
@@ -109,7 +110,7 @@ func (_c *StreamingClient_PublishAsync_Call) Return(_a0 error) *StreamingClient_
 	return _c
 }
 
-func (_c *StreamingClient_PublishAsync_Call) RunAndReturn(run func(context.Context, string, []byte) error) *StreamingClient_PublishAsync_Call {
+func (_c *StreamingClient_PublishAsync_Call) RunAndReturn(run func(context.Context, string, []byte, int64) error) *StreamingClient_PublishAsync_Call {
 	_c.Call.Return(run)
 	return _c
 }

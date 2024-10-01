@@ -14,9 +14,10 @@ type Config struct {
 }
 
 type KafkaConfig struct {
-	Seeds    []string `mapstructure:"seeds" validate:"required,gt=0,dive,hostname_port"` // Kafka seeds
-	User     string   `mapstructure:"user" validate:"required,min=1"`                    // Kafka user
-	Password string   `mapstructure:"password" validate:"required,min=1"`                // Kafka password
+	Seeds         []string `mapstructure:"seeds" validate:"required,gt=0,dive,hostname_port"` // Kafka seeds
+	User          string   `mapstructure:"user" validate:"required,min=1"`                    // Kafka user
+	Password      string   `mapstructure:"password" validate:"required,min=1"`                // Kafka password
+	NumPartitions int32    `mapstructure:"num_partitions" validate:"required,min=1"`          // Number of partitions for the Kafka topic
 }
 
 type DatabaseConfig struct {

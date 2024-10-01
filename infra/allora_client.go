@@ -3,8 +3,10 @@ package infra
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/allora-network/allora-producer/app/domain"
+	"github.com/allora-network/allora-producer/util"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
@@ -28,6 +30,9 @@ var _ domain.AlloraClientInterface = &AlloraClient{}
 
 // GetBlockByHeight implements domain.AlloraClientInterface.
 func (a *AlloraClient) GetBlockByHeight(ctx context.Context, height int64) (*coretypes.ResultBlock, error) {
+	defer util.LogExecutionTime(time.Now(), "GetBlockByHeight", map[string]interface{}{
+		"height": height,
+	})
 	block, err := a.client.Block(ctx, &height)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve block %d from %s: %w", height, a.rpcURL, err)
@@ -38,6 +43,9 @@ func (a *AlloraClient) GetBlockByHeight(ctx context.Context, height int64) (*cor
 
 // GetBlockResults implements domain.AlloraClientInterface.
 func (a *AlloraClient) GetBlockResults(ctx context.Context, height int64) (*coretypes.ResultBlockResults, error) {
+	defer util.LogExecutionTime(time.Now(), "GetBlockResults", map[string]interface{}{
+		"height": height,
+	})
 	results, err := a.client.BlockResults(ctx, &height)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve block results for block %d from %s: %w", height, a.rpcURL, err)
@@ -48,6 +56,7 @@ func (a *AlloraClient) GetBlockResults(ctx context.Context, height int64) (*core
 
 // GetLatestBlockHeight implements domain.AlloraClientInterface.
 func (a *AlloraClient) GetLatestBlockHeight(ctx context.Context) (int64, error) {
+	defer util.LogExecutionTime(time.Now(), "GetLatestBlockHeight", map[string]interface{}{})
 	status, err := a.client.Status(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("failed to retrieve status from %s: %w", a.rpcURL, err)
@@ -56,6 +65,9 @@ func (a *AlloraClient) GetLatestBlockHeight(ctx context.Context) (int64, error) 
 }
 
 func (a *AlloraClient) GetHeader(ctx context.Context, height int64) (*coretypes.ResultHeader, error) {
+	defer util.LogExecutionTime(time.Now(), "GetHeader", map[string]interface{}{
+		"height": height,
+	})
 	header, err := a.client.Header(ctx, &height)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve header for block %d from %s: %w", height, a.rpcURL, err)

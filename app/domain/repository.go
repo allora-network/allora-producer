@@ -32,7 +32,7 @@ type TopicRouter interface {
 
 type StreamingClient interface {
 	// PublishAsync publishes a message to a topic asynchronously
-	PublishAsync(ctx context.Context, msgType string, message []byte) error
+	PublishAsync(ctx context.Context, msgType string, message []byte, blockHeight int64) error
 	// Close closes the client
 	Close() error
 }

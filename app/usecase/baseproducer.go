@@ -94,7 +94,6 @@ func (bm *BaseProducer) MonitorLoopParallel(ctx context.Context, processBlock fu
 		go func() {
 			defer wg.Done()
 			for height := range blockQueue {
-				bm.logger.Debug().Msgf("Worker %d processing block at height %d", i, height)
 				if err := processBlock(ctx, height); err != nil {
 					bm.logger.Warn().Err(err).Msgf("failed to process block at height %d", height)
 					// Re-enqueue for immediate retry

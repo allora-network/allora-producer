@@ -6,7 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func LogExecutionTime(start time.Time, name string) {
+func LogExecutionTime(start time.Time, name string, fields interface{}) {
 	elapsed := time.Since(start)
-	log.Debug().Str("name", name).Dur("elapsed", elapsed).Msg("execution time")
+	log.Info().Str("name", name).Fields(fields).Dur("elapsed (ms)", elapsed).Msg("execution time")
 }

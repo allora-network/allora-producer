@@ -52,11 +52,18 @@ func NewProcessorService(streamingClient domain.StreamingClient, codec domain.Co
 
 // ProcessBlock implements domain.ProcessorService.
 func (m *ProcessorService) ProcessBlock(ctx context.Context, block *coretypes.ResultBlock) error {
-	defer util.LogExecutionTime(time.Now(), "ProcessBlock")
-
-	if block.Block == nil {
+	if block == nil {
 		return fmt.Errorf("block is nil")
 	}
+
+	if block.Block == nil {
+		return fmt.Errorf("block.Block is nil")
+	}
+
+	defer util.LogExecutionTime(time.Now(), "ProcessBlock", map[string]interface{}{
+		"height": block.Block.Header.Height,
+		"txs":    len(block.Block.Data.Txs),
+	})
 
 	for i, tx := range block.Block.Data.Txs {
 		err := m.ProcessTransaction(ctx, tx, i, &block.Block.Header)
@@ -76,8 +83,6 @@ func (m *ProcessorService) ProcessBlock(ctx context.Context, block *coretypes.Re
 }
 
 func (m *ProcessorService) ProcessTransaction(ctx context.Context, tx []byte, txIndex int, header *types.Header) error {
-	defer util.LogExecutionTime(time.Now(), "ProcessTransaction")
-
 	if header == nil {
 		return fmt.Errorf("header is nil")
 	}
@@ -112,27 +117,31 @@ func (m *ProcessorService) ProcessTransaction(ctx context.Context, tx []byte, tx
 			return fmt.Errorf("failed to marshal message: %w", err)
 		}
 
-		err = m.streamingClient.PublishAsync(ctx, txMsg.TypeUrl, jsonMessage)
+		err = m.streamingClient.PublishAsync(ctx, txMsg.TypeUrl, jsonMessage, header.Height)
 		if err != nil {
 			return fmt.Errorf("failed to publish transaction message: %w", err)
 		}
 
-		log.Info().Str("typeUrl", txMsg.TypeUrl).Msg("transaction message processed successfully")
+		log.Debug().Str("typeUrl", txMsg.TypeUrl).Str("message", string(jsonMessage)).Msg("transaction message processed successfully")
 	}
 	return nil
 }
 
 // ProcessBlockResults implements domain.ProcessorService.
 func (m *ProcessorService) ProcessBlockResults(ctx context.Context, blockResults *coretypes.ResultBlockResults, header *types.Header) error {
-	defer util.LogExecutionTime(time.Now(), "ProcessBlockResults")
-
 	if blockResults == nil {
-		return fmt.Errorf("block results is nil")
+		return fmt.Errorf("blockResults is nil")
 	}
 
 	if header == nil {
 		return fmt.Errorf("header is nil")
 	}
+
+	defer util.LogExecutionTime(time.Now(), "ProcessBlockResults", map[string]interface{}{
+		"height":                header.Height,
+		"tx results":            len(blockResults.TxsResults),
+		"finalize block events": len(blockResults.FinalizeBlockEvents),
+	})
 
 	for i, txResult := range blockResults.TxsResults {
 		if txResult == nil {
@@ -162,8 +171,6 @@ func (m *ProcessorService) ProcessBlockResults(ctx context.Context, blockResults
 }
 
 func (m *ProcessorService) ProcessEvent(ctx context.Context, event *abci.Event, header *types.Header) error {
-	defer util.LogExecutionTime(time.Now(), "ProcessEvent")
-
 	if event == nil {
 		return fmt.Errorf("event is nil")
 	}
@@ -197,11 +204,11 @@ func (m *ProcessorService) ProcessEvent(ctx context.Context, event *abci.Event, 
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
 
-	err = m.streamingClient.PublishAsync(ctx, event.Type, jsonMessage)
+	err = m.streamingClient.PublishAsync(ctx, event.Type, jsonMessage, header.Height)
 	if err != nil {
 		return fmt.Errorf("failed to publish event: %w", err)
 	}
 
-	log.Info().Str("eventType", event.Type).Msg("event processed successfully")
+	log.Debug().Str("eventType", event.Type).Str("event", string(jsonMessage)).Msg("event processed successfully")
 	return nil
 }

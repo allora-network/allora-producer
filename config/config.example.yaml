@@ -6,6 +6,7 @@ kafka:
     - "localhost:9092"
   user: "user"
   password: "pass"
+  num_partitions: 6
 
 allora:
   rpc: "https://allora-rpc.testnet.allora.network"
@@ -17,7 +18,7 @@ log:
 producer:
   block_refresh_interval: 5s
   rate_limit_interval: 1s
-  num_workers: 5
+  num_workers: 6
 
 kafka_topic_router:
   - name: "topic.staking"

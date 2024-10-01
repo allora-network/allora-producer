@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/allora-network/allora-producer/app/domain"
-	"github.com/allora-network/allora-producer/util"
 	"github.com/rs/zerolog/log"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sasl/plain"
@@ -24,12 +23,13 @@ type KafkaClient interface {
 }
 
 type kafkaStreamingClient struct {
-	client KafkaClient
-	router domain.TopicRouter
+	client        KafkaClient
+	router        domain.TopicRouter
+	numPartitions int32
 }
 
 // Update the constructor to accept a TopicRouter.
-func NewKafkaClient(client KafkaClient, router domain.TopicRouter) (domain.StreamingClient, error) {
+func NewKafkaClient(client KafkaClient, router domain.TopicRouter, numPartitions int32) (domain.StreamingClient, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
 	}
@@ -38,34 +38,39 @@ func NewKafkaClient(client KafkaClient, router domain.TopicRouter) (domain.Strea
 	}
 
 	return &kafkaStreamingClient{
-		client: client,
-		router: router,
+		client:        client,
+		router:        router,
+		numPartitions: numPartitions,
 	}, nil
 }
 
 // Publish publishes a message based on its MessageType.
-func (k *kafkaStreamingClient) PublishAsync(ctx context.Context, msgType string, message []byte) error {
-	defer util.LogExecutionTime(time.Now(), "Publish")
-
+func (k *kafkaStreamingClient) PublishAsync(ctx context.Context, msgType string, message []byte, blockHeight int64) error {
 	topic, err := k.router.GetTopic(msgType)
 	if err != nil {
 		log.Warn().Any("msgType", msgType).Err(err).Msg("failed to get topic")
 		return err
 	}
 
+	partition := k.getPartition(blockHeight)
 	record := &kgo.Record{
-		Topic: topic,
-		Value: message,
+		Topic:     topic,
+		Value:     message,
+		Partition: partition,
 	}
 	// Async produce
 	k.client.Produce(ctx, record, func(record *kgo.Record, err error) {
 		if err != nil {
-			log.Error().Err(err).Str("topic", record.Topic).Msg("failed to deliver message")
+			log.Warn().Err(err).Str("topic", record.Topic).Msg("failed to deliver message")
 		} else {
 			log.Debug().Str("topic", record.Topic).Msg("message delivered")
 		}
 	})
 	return nil
+}
+
+func (k *kafkaStreamingClient) getPartition(blockHeight int64) int32 {
+	return int32(blockHeight % int64(k.numPartitions)) //nolint:gosec // k.numPartitions is a small number, so the modulo will not overflow an int32
 }
 
 func (k *kafkaStreamingClient) Close() error {
@@ -87,15 +92,12 @@ func NewFranzClient(seeds []string, user, password string) (*kgo.Client, error) 
 			User: user,
 			Pass: password,
 		}.AsMechanism()),
-		kgo.ProducerBatchCompression(kgo.SnappyCompression()),
-		kgo.RecordRetries(10),
+		kgo.ProducerBatchCompression(kgo.ZstdCompression()),
 		kgo.RequiredAcks(kgo.AllISRAcks()),
-		kgo.ProducerBatchMaxBytes(1e6),
-		kgo.ProducerLinger(100 * time.Millisecond),
-		kgo.RetryTimeout(30 * time.Second),
-		kgo.RetryBackoffFn(func(attempt int) time.Duration {
-			return time.Duration(attempt) * 100 * time.Millisecond
-		}),
+		kgo.ProducerBatchMaxBytes(16e6),
+		kgo.RecordPartitioner(kgo.ManualPartitioner()),
+		kgo.MaxBufferedRecords(1e6),
+		kgo.MetadataMaxAge(60 * time.Second),
 	}
 
 	return kgo.NewClient(opts...)

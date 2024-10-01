@@ -52,7 +52,7 @@ func (m *EventsProducer) Execute(ctx context.Context) error {
 }
 
 func (m *EventsProducer) processBlockResults(ctx context.Context, height int64) error {
-	m.logger.Debug().Msgf("Processing block results for height %d", height)
+	m.logger.Info().Msgf("Processing block results for height %d", height)
 	// Fetch BlockResults
 	blockResults, err := m.alloraClient.GetBlockResults(ctx, height)
 	if err != nil {

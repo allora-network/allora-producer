@@ -40,10 +40,10 @@ func TestPublishAsync_Success(t *testing.T) {
 		promise(record, nil)
 	}).Return()
 
-	client, err := NewKafkaClient(mockClient, mockRouter)
+	client, err := NewKafkaClient(mockClient, mockRouter, 6)
 	require.NoError(t, err)
 
-	err = client.PublishAsync(context.Background(), msgType, message)
+	err = client.PublishAsync(context.Background(), msgType, message, 100)
 
 	require.NoError(t, err)
 	mockRouter.AssertExpectations(t)
@@ -60,10 +60,10 @@ func TestPublishAsync_GetTopicError(t *testing.T) {
 
 	mockRouter.On("GetTopic", msgType).Return("", errGetTopic)
 
-	client, err := NewKafkaClient(mockClient, mockRouter)
+	client, err := NewKafkaClient(mockClient, mockRouter, 6)
 	require.NoError(t, err)
 
-	err = client.PublishAsync(context.Background(), msgType, message)
+	err = client.PublishAsync(context.Background(), msgType, message, 100)
 
 	assert.Equal(t, errGetTopic, err)
 	mockRouter.AssertExpectations(t)
@@ -89,10 +89,10 @@ func TestPublishAsync_ProduceError(t *testing.T) {
 		promise(record, produceErr)
 	}).Return()
 
-	client, err := NewKafkaClient(mockClient, mockRouter)
+	client, err := NewKafkaClient(mockClient, mockRouter, 6)
 	require.NoError(t, err)
 
-	err = client.PublishAsync(context.Background(), msgType, message)
+	err = client.PublishAsync(context.Background(), msgType, message, 100)
 
 	require.NoError(t, err)
 	mockRouter.AssertExpectations(t)
@@ -106,7 +106,7 @@ func TestClose_Success(t *testing.T) {
 
 	mockRouter := new(MockTopicRouter)
 
-	client, err := NewKafkaClient(mockClient, mockRouter)
+	client, err := NewKafkaClient(mockClient, mockRouter, 6)
 	require.NoError(t, err)
 
 	err = client.Close()
@@ -123,7 +123,7 @@ func TestClose_FlushTimeout(t *testing.T) {
 
 	mockRouter := new(MockTopicRouter)
 
-	client, err := NewKafkaClient(mockClient, mockRouter)
+	client, err := NewKafkaClient(mockClient, mockRouter, 6)
 	require.NoError(t, err)
 
 	err = client.Close()
@@ -164,7 +164,7 @@ func TestNewKafkaClient(t *testing.T) {
 
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
-			client, err := NewKafkaClient(tt.client, tt.router)
+			client, err := NewKafkaClient(tt.client, tt.router, 6)
 			if tt.wantErr {
 				require.Error(t, err)
 				require.Nil(t, client)
@@ -172,6 +172,46 @@ func TestNewKafkaClient(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, client)
 			}
+		})
+	}
+}
+
+func TestGetPartition(t *testing.T) {
+	kafkaClient := &kafkaStreamingClient{
+		numPartitions: 6,
+	}
+
+	cases := []struct {
+		name          string
+		blockHeight   int64
+		wantPartition int32
+	}{
+		{
+			name:          "blockHeight 0",
+			blockHeight:   0,
+			wantPartition: 0,
+		},
+		{
+			name:          "blockHeight 1",
+			blockHeight:   1,
+			wantPartition: 1,
+		},
+		{
+			name:          "blockHeight 6",
+			blockHeight:   6,
+			wantPartition: 0,
+		},
+		{
+			name:          "blockHeight 7",
+			blockHeight:   7,
+			wantPartition: 1,
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			partition := kafkaClient.getPartition(tt.blockHeight)
+			assert.Equal(t, tt.wantPartition, partition)
 		})
 	}
 }
