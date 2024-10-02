@@ -92,7 +92,7 @@ func NewFranzClient(seeds []string, user, password string) (*kgo.Client, error) 
 			User: user,
 			Pass: password,
 		}.AsMechanism()),
-		kgo.ProducerBatchCompression(kgo.ZstdCompression()),
+		kgo.ProducerBatchCompression(kgo.SnappyCompression()), // Do not change this, as this is the only compression type supported by most kafka clients
 		kgo.RequiredAcks(kgo.AllISRAcks()),
 		kgo.ProducerBatchMaxBytes(16e6),
 		kgo.RecordPartitioner(kgo.ManualPartitioner()),
