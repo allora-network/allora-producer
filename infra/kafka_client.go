@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net"
 	"time"
 
@@ -23,13 +24,12 @@ type KafkaClient interface {
 }
 
 type kafkaStreamingClient struct {
-	client        KafkaClient
-	router        domain.TopicRouter
-	numPartitions int32
+	client KafkaClient
+	router domain.TopicRouter
 }
 
 // Update the constructor to accept a TopicRouter.
-func NewKafkaClient(client KafkaClient, router domain.TopicRouter, numPartitions int32) (domain.StreamingClient, error) {
+func NewKafkaClient(client KafkaClient, router domain.TopicRouter) (domain.StreamingClient, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
 	}
@@ -38,9 +38,8 @@ func NewKafkaClient(client KafkaClient, router domain.TopicRouter, numPartitions
 	}
 
 	return &kafkaStreamingClient{
-		client:        client,
-		router:        router,
-		numPartitions: numPartitions,
+		client: client,
+		router: router,
 	}, nil
 }
 
@@ -52,11 +51,10 @@ func (k *kafkaStreamingClient) PublishAsync(ctx context.Context, msgType string,
 		return err
 	}
 
-	partition := k.getPartition(blockHeight)
 	record := &kgo.Record{
-		Topic:     topic,
-		Value:     message,
-		Partition: partition,
+		Topic: topic,
+		Value: message,
+		Key:   []byte(fmt.Sprintf("%d", blockHeight)), // Use block height as the key to ensure order
 	}
 	// Async produce
 	k.client.Produce(ctx, record, func(record *kgo.Record, err error) {
@@ -69,10 +67,6 @@ func (k *kafkaStreamingClient) PublishAsync(ctx context.Context, msgType string,
 	return nil
 }
 
-func (k *kafkaStreamingClient) getPartition(blockHeight int64) int32 {
-	return int32(blockHeight % int64(k.numPartitions)) //nolint:gosec // k.numPartitions is a small number, so the modulo will not overflow an int32
-}
-
 func (k *kafkaStreamingClient) Close() error {
 	// Gracefully flush all pending messages before closing
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -83,8 +77,13 @@ func (k *kafkaStreamingClient) Close() error {
 	return nil
 }
 
+func (k *kafkaStreamingClient) Flush(ctx context.Context) error {
+	return k.client.Flush(ctx)
+}
+
 func NewFranzClient(seeds []string, user, password string) (*kgo.Client, error) {
 	tlsDialer := &tls.Dialer{NetDialer: &net.Dialer{Timeout: 10 * time.Second}}
+	// Idempotency is enabled by default.
 	opts := []kgo.Opt{
 		kgo.SeedBrokers(seeds...),
 		kgo.Dialer(tlsDialer.DialContext),
@@ -95,9 +94,9 @@ func NewFranzClient(seeds []string, user, password string) (*kgo.Client, error) 
 		kgo.ProducerBatchCompression(kgo.SnappyCompression()), // Do not change this, as this is the only compression type supported by most kafka clients
 		kgo.RequiredAcks(kgo.AllISRAcks()),
 		kgo.ProducerBatchMaxBytes(16e6),
-		kgo.RecordPartitioner(kgo.ManualPartitioner()),
 		kgo.MaxBufferedRecords(1e6),
 		kgo.MetadataMaxAge(60 * time.Second),
+		kgo.RecordPartitioner(kgo.UniformBytesPartitioner(1e6, false, true, nil)),
 	}
 
 	return kgo.NewClient(opts...)

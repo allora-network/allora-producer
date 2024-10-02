@@ -35,6 +35,8 @@ type StreamingClient interface {
 	PublishAsync(ctx context.Context, msgType string, message []byte, blockHeight int64) error
 	// Close closes the client
 	Close() error
+	// Flush flushes the client
+	Flush(ctx context.Context) error
 }
 
 // DecodeTxMsg decodes a transaction message

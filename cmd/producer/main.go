@@ -56,7 +56,7 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Str("component", "KafkaClient").Msg("failed to create Kafka client")
 	}
-	kafkaClient, err := infra.NewKafkaClient(franzClient, topicRouter, cfg.Kafka.NumPartitions)
+	kafkaClient, err := infra.NewKafkaClient(franzClient, topicRouter)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create Kafka client")
 	}

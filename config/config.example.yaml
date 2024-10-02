@@ -6,7 +6,6 @@ kafka:
     - "localhost:9092"
   user: "user"
   password: "pass"
-  num_partitions: 6
 
 allora:
   rpc: "https://allora-rpc.testnet.allora.network"
