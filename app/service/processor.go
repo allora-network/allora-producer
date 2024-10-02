@@ -193,7 +193,7 @@ func (m *ProcessorService) ProcessEvent(ctx context.Context, event *abci.Event, 
 		return fmt.Errorf("failed to marshal event: %w", err)
 	}
 
-	metadata := domain.NewMetadata(header.Height, header.ChainID, header.Hash().String(), header.Time, 0, "", "")
+	metadata := domain.NewMetadata(header.Height, header.ChainID, header.Hash().String(), header.Time, 0, "", event.Type)
 	payload := domain.NewPayload(metadata, jsonMsg)
 	message, err := domain.NewMessage(domain.MessageTypeEvent, event.Type, payload)
 	if err != nil {

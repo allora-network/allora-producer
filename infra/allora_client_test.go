@@ -10,6 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/allora-network/allora-producer/infra/mocks"
+
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/types"
 )
 
 func TestAlloraClient_GetBlockByHeight(t *testing.T) {
@@ -21,7 +24,19 @@ func TestAlloraClient_GetBlockByHeight(t *testing.T) {
 
 	ctx := context.Background()
 	height := int64(100)
-	expectedBlock := &coretypes.ResultBlock{}
+	expectedBlock := &coretypes.ResultBlock{
+		Block: &types.Block{
+			Header: types.Header{
+				Height: height,
+			},
+			Data: types.Data{
+				Txs: types.Txs{
+					[]byte("tx1"),
+					[]byte("tx2"),
+				},
+			},
+		},
+	}
 
 	mockRPC.On("Block", ctx, &height).Return(expectedBlock, nil)
 
@@ -60,7 +75,39 @@ func TestAlloraClient_GetBlockResults(t *testing.T) {
 
 	ctx := context.Background()
 	height := int64(100)
-	expectedResults := &coretypes.ResultBlockResults{}
+	expectedResults := &coretypes.ResultBlockResults{
+		Height: height,
+		TxsResults: []*abci.ExecTxResult{
+			{
+				Code: 0,
+				Data: []byte("result data"),
+				Events: []abci.Event{
+					{
+						Type: "event_type",
+						Attributes: []abci.EventAttribute{
+							{
+								Key:   "key1",
+								Value: "value1",
+								Index: true,
+							},
+						},
+					},
+				},
+			},
+		},
+		FinalizeBlockEvents: []abci.Event{
+			{
+				Type: "finalize_event_type",
+				Attributes: []abci.EventAttribute{
+					{
+						Key:   "key2",
+						Value: "value2",
+						Index: true,
+					},
+				},
+			},
+		},
+	}
 
 	mockRPC.On("BlockResults", ctx, &height).Return(expectedResults, nil)
 
@@ -132,6 +179,24 @@ func TestAlloraClient_GetLatestBlockHeight_Error(t *testing.T) {
 	mockRPC.AssertExpectations(t)
 }
 
+func TestAlloraClient_GetLatestBlockHeight_NilStatus(t *testing.T) {
+	mockRPC := new(mocks.RPCClient)
+	client := &AlloraClient{
+		rpcURL: "http://localhost:26657",
+		client: mockRPC,
+	}
+
+	ctx := context.Background()
+
+	mockRPC.On("Status", ctx).Return((*coretypes.ResultStatus)(nil), nil)
+
+	height, err := client.GetLatestBlockHeight(ctx)
+	require.Error(t, err)
+	assert.Equal(t, int64(0), height)
+	assert.Contains(t, err.Error(), "status is nil")
+	mockRPC.AssertExpectations(t)
+}
+
 func TestAlloraClient_GetHeader(t *testing.T) {
 	mockRPC := new(mocks.RPCClient)
 	client := &AlloraClient{
@@ -141,7 +206,11 @@ func TestAlloraClient_GetHeader(t *testing.T) {
 
 	ctx := context.Background()
 	height := int64(200)
-	expectedHeader := &coretypes.ResultHeader{}
+	expectedHeader := &coretypes.ResultHeader{
+		Header: &types.Header{
+			Height: height,
+		},
+	}
 
 	mockRPC.On("Header", ctx, &height).Return(expectedHeader, nil)
 

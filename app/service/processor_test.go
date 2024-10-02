@@ -216,3 +216,14 @@ func TestProcessorService_ProcessBlockResults(t *testing.T) {
 	mockCodec.AssertExpectations(t)
 	mockEventFilter.AssertExpectations(t)
 }
+
+func TestProcessorService_NewProcessorService_Error(t *testing.T) {
+	mockKafka := new(mocks.StreamingClient)
+	mockCodec := new(mocks.CodecInterface)
+	mockEventFilter := new(mocks.FilterInterface[abcitypes.Event])
+	mockTxFilter := new(mocks.FilterInterface[codectypes.Any])
+
+	service, err := NewProcessorService(mockKafka, mockCodec, mockEventFilter, mockTxFilter)
+	require.NoError(t, err)
+	require.NotNil(t, service)
+}

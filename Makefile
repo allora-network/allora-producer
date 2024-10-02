@@ -41,5 +41,13 @@ lint:
 	@echo "--> Running linter"
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61 run --timeout=10m --fix
 
+cover:
+	mkdir -p coverage
+	rm -rf coverage/*
+	$(GOTEST) -coverprofile=./coverage/coverage.out.tmp ./...
+	grep -v mock ./coverage/coverage.out.tmp | grep -v allora-chain > ./coverage/coverage.out
+	$(GOCMD) tool cover -html=./coverage/coverage.out -o ./coverage/coverage.html
+	$(GOCMD) tool cover -func=./coverage/coverage.out
+
 # Default target
 .DEFAULT_GOAL := build

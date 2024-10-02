@@ -3,3 +3,6 @@ bin/
 config/config.yaml
 .env
 *.log
+*.html
+*.tmp
+coverage/

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS processed_blocks;
+DROP TABLE IF EXISTS processed_block_events;
 
 CREATE TABLE processed_blocks (
 	id SERIAL PRIMARY KEY,

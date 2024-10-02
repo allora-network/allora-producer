@@ -19,7 +19,7 @@ type Message struct {
 	ID        string    `json:"id"`        // hash of the entire payload
 	Type      string    `json:"type"`      // event or transaction
 	Name      string    `json:"name"`      // type of the payload (full qualified name, e.g. emisions.v3.EventNetworkLossSet)
-	Timestamp time.Time `json:"timestamp"` // timestamp of this message
+	Timestamp time.Time `json:"timestamp"` // timestamp of this message (created at, in UTC)
 	Payload   Payload   `json:"payload"`   // payload of the message
 }
 

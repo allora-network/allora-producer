@@ -75,7 +75,7 @@ func (p *pgProcessedBlock) GetLastProcessedBlockEvent(ctx context.Context) (doma
 		if err == pgx.ErrNoRows {
 			return domain.ProcessedBlockEvent{}, nil
 		}
-		return domain.ProcessedBlockEvent{}, fmt.Errorf("failed to get processed block event: %w", err)
+		return domain.ProcessedBlockEvent{}, fmt.Errorf("failed to get last processed block event: %w", err)
 	}
 	return event, nil
 }

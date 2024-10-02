@@ -227,9 +227,47 @@ func TestCodec_ParseEvent(t *testing.T) {
 			{Key: "key2", Value: "value2"},
 		},
 	}
-	expectedProtoMessage := &abcitypes.Event{}
+	expectedProtoMessage := &abcitypes.Event{
+		Type: "test.event",
+		Attributes: []abcitypes.EventAttribute{
+			{Key: "key1", Value: "value1"},
+			{Key: "key2", Value: "value2"},
+		},
+	}
 
 	mockSDKTypes.On("ParseTypedEvent", mock.Anything).Return(expectedProtoMessage, nil)
+
+	result, err := c.ParseEvent(mockEvent)
+
+	require.NoError(t, err)
+	require.Equal(t, expectedProtoMessage, result)
+	mockSDKTypes.AssertExpectations(t)
+}
+
+func TestCodec_ParseEvent_WithModeAttribute(t *testing.T) {
+	c, _, mockSDKTypes := newTestCodec()
+
+	mockEvent := &abcitypes.Event{
+		Type: "test.event",
+		Attributes: []abcitypes.EventAttribute{
+			{Key: "key1", Value: "value1"},
+			{Key: "key2", Value: "value2"},
+			{Key: "mode", Value: "value3"},
+		},
+	}
+
+	mockEventCopy := *mockEvent
+	mockEventCopy.Attributes = mockEventCopy.Attributes[:len(mockEventCopy.Attributes)-1]
+
+	expectedProtoMessage := &abcitypes.Event{
+		Type: "test.event",
+		Attributes: []abcitypes.EventAttribute{
+			{Key: "key1", Value: "value1"},
+			{Key: "key2", Value: "value2"},
+		},
+	}
+
+	mockSDKTypes.On("ParseTypedEvent", mockEventCopy).Return(expectedProtoMessage, nil)
 
 	result, err := c.ParseEvent(mockEvent)
 
@@ -290,4 +328,30 @@ func TestCodec_MarshalProtoJSON_Error(t *testing.T) {
 	require.EqualError(t, err, "failed to marshal json: marshal error")
 
 	mockCodec.AssertExpectations(t)
+}
+
+func TestCodec_ParseEvent_WithParseTypedEventError(t *testing.T) {
+	c, _, mockSDKTypes := newTestCodec()
+
+	mockEvent := &abcitypes.Event{
+		Type: "test.event",
+		Attributes: []abcitypes.EventAttribute{
+			{Key: "key1", Value: "value1"},
+			{Key: "key2", Value: "value2"},
+		},
+	}
+
+	parseError := errors.New("parse error")
+	mockSDKTypes.On("ParseTypedEvent", mock.Anything).Return(nil, parseError)
+
+	result, err := c.ParseEvent(mockEvent)
+	require.Error(t, err)
+	require.Nil(t, result)
+	require.EqualError(t, err, "failed to parse typed event: parse error")
+	mockSDKTypes.AssertExpectations(t)
+}
+
+func TestCodec_NewCodec(t *testing.T) {
+	c := NewCodec()
+	require.NotNil(t, c)
 }

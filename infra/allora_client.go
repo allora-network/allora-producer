@@ -61,6 +61,11 @@ func (a *AlloraClient) GetLatestBlockHeight(ctx context.Context) (int64, error) 
 	if err != nil {
 		return 0, fmt.Errorf("failed to retrieve status from %s: %w", a.rpcURL, err)
 	}
+
+	if status == nil {
+		return 0, fmt.Errorf("status is nil")
+	}
+
 	return status.SyncInfo.LatestBlockHeight, nil
 }
 

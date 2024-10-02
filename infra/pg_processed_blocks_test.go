@@ -126,3 +126,113 @@ func TestSaveProcessedBlock_Error(t *testing.T) {
 
 	mockPool.AssertExpectations(t)
 }
+
+func TestGetLastProcessedBlockEvent_Success(t *testing.T) {
+	mockPool := new(mocks.DBPool)
+	repo, err := NewPgProcessedBlock(mockPool)
+	require.NoError(t, err)
+
+	mockRow := new(mocks.RowInterface)
+	expectedEvent := domain.ProcessedBlockEvent{
+		ID:          1,
+		Height:      123,
+		ProcessedAt: time.Now(),
+		Status:      "success",
+	}
+
+	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_block_events ORDER BY height DESC LIMIT 1").
+		Return(mockRow)
+	mockRow.On("Scan", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		if len(args) > 0 {
+			if eventPtr, ok := args[0].(*domain.ProcessedBlockEvent); ok {
+				*eventPtr = expectedEvent
+			}
+		}
+	})
+
+	event, err := repo.GetLastProcessedBlockEvent(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, expectedEvent, event)
+
+	mockPool.AssertExpectations(t)
+	mockRow.AssertExpectations(t)
+}
+
+func TestGetLastProcessedBlockEvent_NoRows(t *testing.T) {
+	mockPool := new(mocks.DBPool)
+	repo, err := NewPgProcessedBlock(mockPool)
+	require.NoError(t, err)
+
+	mockRow := new(mocks.RowInterface)
+	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_block_events ORDER BY height DESC LIMIT 1").
+		Return(mockRow)
+	mockRow.On("Scan", mock.Anything).Return(pgx.ErrNoRows)
+
+	event, err := repo.GetLastProcessedBlockEvent(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, domain.ProcessedBlockEvent{}, event)
+
+	mockPool.AssertExpectations(t)
+	mockRow.AssertExpectations(t)
+}
+
+func TestGetLastProcessedBlockEvent_Error(t *testing.T) {
+	mockPool := new(mocks.DBPool)
+	repo, err := NewPgProcessedBlock(mockPool)
+	require.NoError(t, err)
+
+	mockRow := new(mocks.RowInterface)
+	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_block_events ORDER BY height DESC LIMIT 1").
+		Return(mockRow)
+	mockRow.On("Scan", mock.Anything).Return(errors.New("scan error"))
+
+	event, err := repo.GetLastProcessedBlockEvent(context.Background())
+	require.Error(t, err)
+	assert.Equal(t, domain.ProcessedBlockEvent{}, event)
+	assert.Contains(t, err.Error(), "failed to get last processed block event")
+
+	mockPool.AssertExpectations(t)
+	mockRow.AssertExpectations(t)
+}
+func TestSaveProcessedBlockEvent_Success(t *testing.T) {
+	mockPool := new(mocks.DBPool)
+	repo, err := NewPgProcessedBlock(mockPool)
+	require.NoError(t, err)
+
+	event := domain.ProcessedBlockEvent{
+		Height:      456,
+		ProcessedAt: time.Now(),
+		Status:      domain.StatusCompleted,
+	}
+
+	mockPool.On("Exec", mock.Anything, "INSERT INTO processed_block_events (height, processed_at, status) VALUES ($1, $2, $3)",
+		event.Height, event.ProcessedAt, event.Status).
+		Return(pgconn.CommandTag("INSERT 1"), nil)
+
+	err = repo.SaveProcessedBlockEvent(context.Background(), event)
+	require.NoError(t, err)
+
+	mockPool.AssertExpectations(t)
+}
+
+func TestSaveProcessedBlockEvent_Error(t *testing.T) {
+	mockPool := new(mocks.DBPool)
+	repo, err := NewPgProcessedBlock(mockPool)
+	require.NoError(t, err)
+
+	event := domain.ProcessedBlockEvent{
+		Height:      789,
+		ProcessedAt: time.Now(),
+		Status:      "failed",
+	}
+
+	mockPool.On("Exec", mock.Anything, "INSERT INTO processed_block_events (height, processed_at, status) VALUES ($1, $2, $3)",
+		event.Height, event.ProcessedAt, event.Status).
+		Return(pgconn.CommandTag(""), errors.New("exec error"))
+
+	err = repo.SaveProcessedBlockEvent(context.Background(), event)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to save processed block event")
+
+	mockPool.AssertExpectations(t)
+}

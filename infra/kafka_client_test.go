@@ -215,3 +215,14 @@ func TestGetPartition(t *testing.T) {
 		})
 	}
 }
+
+func TestNewFranzClient(t *testing.T) {
+	seeds := []string{"seed1:9092", "seed2:9092"}
+	user := "testUser"
+	password := "testPassword"
+
+	client, err := NewFranzClient(seeds, user, password)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+	require.IsType(t, &kgo.Client{}, client)
+}
