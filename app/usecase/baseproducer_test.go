@@ -22,10 +22,11 @@ func TestBaseProducer_InitStartHeight(t *testing.T) {
 	logger := zerolog.Nop()
 
 	bm := &BaseProducer{
-		alloraClient: mockAlloraClient,
-		repository:   mockRepository,
-		service:      mockService,
-		logger:       &logger,
+		alloraClient:      mockAlloraClient,
+		repository:        mockRepository,
+		service:           mockService,
+		logger:            &logger,
+		rateLimitInterval: 10 * time.Millisecond,
 	}
 
 	t.Run("StartHeight is zero, fetch latest height", func(t *testing.T) {
@@ -64,6 +65,22 @@ func TestBaseProducer_InitStartHeight(t *testing.T) {
 
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "failed to get latest block height")
+		mockAlloraClient.AssertCalled(t, "GetLatestBlockHeight", mock.Anything)
+	})
+
+	t.Run("StartHeight is zero, fetch latest height after 5 retries", func(t *testing.T) {
+		bm.startHeight = 0
+		mockAlloraClient.ExpectedCalls = nil
+		mockAlloraClient.Calls = nil
+
+		mockAlloraClient.On("GetLatestBlockHeight", mock.Anything).Return(int64(0), errors.New("network error")).Times(5)
+		mockAlloraClient.On("GetLatestBlockHeight", mock.Anything).Return(int64(100), nil)
+
+		bm.startHeight = 0
+		err := bm.InitStartHeight(context.Background())
+
+		require.NoError(t, err)
+		require.Equal(t, int64(100), bm.startHeight)
 		mockAlloraClient.AssertCalled(t, "GetLatestBlockHeight", mock.Anything)
 	})
 }

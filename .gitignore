@@ -1,8 +1,9 @@
 bin/
 *.out
-config/config.yaml
+config.yaml
 .env
 *.log
 *.html
 *.tmp
 coverage/
+*.txt

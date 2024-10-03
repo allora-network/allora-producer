@@ -24,11 +24,21 @@ type BaseProducer struct {
 // InitStartHeight checks if the start height is zero and fetches the latest block height.
 func (bm *BaseProducer) InitStartHeight(ctx context.Context) error {
 	if bm.startHeight == 0 {
-		latestHeight, err := bm.alloraClient.GetLatestBlockHeight(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to get latest block height: %w", err)
+		var retryCount int
+		for {
+			latestHeight, err := bm.alloraClient.GetLatestBlockHeight(ctx)
+			if err != nil {
+				bm.logger.Warn().Err(err).Msg("failed to get latest block height")
+				retryCount++
+				if retryCount > 5 {
+					return fmt.Errorf("failed to get latest block height after 5 retries: %w", err)
+				}
+				time.Sleep(bm.rateLimitInterval)
+				continue
+			}
+			bm.startHeight = latestHeight
+			break
 		}
-		bm.startHeight = latestHeight
 	}
 	return nil
 }
@@ -97,7 +107,9 @@ func (bm *BaseProducer) MonitorLoopParallel(ctx context.Context, processBlock fu
 				if err := processBlock(ctx, height); err != nil {
 					bm.logger.Warn().Err(err).Msgf("failed to process block at height %d", height)
 					// Re-enqueue for immediate retry
-					blockQueue <- height
+					if blockQueue != nil {
+						blockQueue <- height
+					}
 				}
 				time.Sleep(bm.rateLimitInterval)
 			}

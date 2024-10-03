@@ -21,7 +21,8 @@ import (
 func main() {
 	log.Info().Msg("Starting Allora Chain Producers")
 	// Load config
-	cfg, err := config.InitConfig()
+	cfgProvider := config.NewProvider(config.NewViperAdapter())
+	cfg, err := cfgProvider.InitConfig()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load config")
 	}

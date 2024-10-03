@@ -17,7 +17,9 @@ RUN go build -o allora-producer ./cmd/producer
 
 FROM alpine:3.20
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
+    rm -rf /var/cache/apk/*
+
 WORKDIR /home/appuser/
 
 COPY --from=builder /app/allora-producer .

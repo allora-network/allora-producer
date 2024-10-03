@@ -3,6 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - ALLORA_DATABASE_URL=${ALLORA_DATABASE_URL}
+      - ALLORA_KAFKA_SEEDS=${ALLORA_KAFKA_SEEDS}
+      - ALLORA_KAFKA_USER=${ALLORA_KAFKA_USER}
+      - ALLORA_KAFKA_PASSWORD=${ALLORA_KAFKA_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy

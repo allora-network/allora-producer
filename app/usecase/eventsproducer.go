@@ -66,5 +66,20 @@ func (m *EventsProducer) processBlockResults(ctx context.Context, height int64) 
 	}
 
 	// Process the block results and header
-	return m.service.ProcessBlockResults(ctx, blockResults, header.Header)
+	err = m.service.ProcessBlockResults(ctx, blockResults, header.Header)
+	if err != nil {
+		return fmt.Errorf("failed to process block results for height %d: %w", height, err)
+	}
+
+	err = m.repository.SaveProcessedBlockEvent(ctx, domain.ProcessedBlockEvent{
+		Height:      height,
+		ProcessedAt: time.Now(),
+		Status:      domain.StatusCompleted,
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to save processed block results for height %d: %w", height, err)
+	}
+
+	return nil
 }

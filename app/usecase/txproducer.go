@@ -60,5 +60,20 @@ func (m *TransactionsProducer) processBlock(ctx context.Context, height int64) e
 	}
 
 	// Process the block
-	return m.service.ProcessBlock(ctx, block)
+	err = m.service.ProcessBlock(ctx, block)
+	if err != nil {
+		return fmt.Errorf("failed to process block for height %d: %w", height, err)
+	}
+
+	// Save the processed block
+	err = m.repository.SaveProcessedBlock(ctx, domain.ProcessedBlock{
+		Height:      height,
+		ProcessedAt: time.Now(),
+		Status:      domain.StatusCompleted,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to save processed block for height %d: %w", height, err)
+	}
+
+	return nil
 }
