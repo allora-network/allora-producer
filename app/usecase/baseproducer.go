@@ -81,13 +81,15 @@ func (bm *BaseProducer) MonitorLoopParallel(ctx context.Context, processBlock fu
 			default:
 			}
 
+			bm.logger.Info().Msg("getting latest block height")
 			latestHeight, err := bm.alloraClient.GetLatestBlockHeight(ctx)
 			if err != nil {
-				bm.logger.Error().Err(err).Msg("failed to get latest block height")
+				bm.logger.Warn().Err(err).Msg("failed to get latest block height")
 				time.Sleep(bm.rateLimitInterval)
 				continue
 			}
-
+			bm.logger.Info().Msgf("latest block height: %d", latestHeight)
+			bm.logger.Info().Msgf("start height: %d", bm.startHeight)
 			for bm.startHeight <= latestHeight {
 				blockQueue <- bm.startHeight
 				bm.startHeight++

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/allora-network/allora-producer/app/domain"
+	"github.com/allora-network/allora-producer/util"
 	"github.com/rs/zerolog/log"
 )
 
@@ -52,7 +53,8 @@ func (m *EventsProducer) Execute(ctx context.Context) error {
 }
 
 func (m *EventsProducer) processBlockResults(ctx context.Context, height int64) error {
-	m.logger.Info().Msgf("Processing block results for height %d", height)
+	util.LogExecutionTime(time.Now(), "EventsProducer.processBlockResults", map[string]interface{}{"height": height}, m.logger)
+	m.logger.Info().Int64("height", height).Msg("EventsProducer.processBlockResults")
 	// Fetch BlockResults
 	blockResults, err := m.alloraClient.GetBlockResults(ctx, height)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/stretchr/testify/assert"
@@ -242,7 +243,7 @@ func TestAlloraClient_GetHeader_Error(t *testing.T) {
 
 func TestNewAlloraClient(t *testing.T) {
 	rpcURL := "http://localhost:26657"
-	timeout := uint(10)
+	timeout := 10 * time.Second
 
 	clientInterface, err := NewAlloraClient(rpcURL, timeout)
 	require.NoError(t, err)
@@ -252,10 +253,10 @@ func TestNewAlloraClient(t *testing.T) {
 func TestNewAlloraClient_Error(t *testing.T) {
 	// Assuming rpchttp.NewWithTimeout returns an error for invalid URL
 	invalidRPCURL := "http://invalid:timeout"
-	timeout := uint(10)
+	timeout := 10 * time.Second
 
 	clientInterface, err := NewAlloraClient(invalidRPCURL, timeout)
 	require.Error(t, err)
 	assert.Nil(t, clientInterface)
-	assert.Contains(t, err.Error(), "failed to create new client from node")
+	assert.Contains(t, err.Error(), "error creating default http client")
 }

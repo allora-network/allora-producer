@@ -7,13 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/rs/zerolog/log"
 
 	"github.com/allora-network/allora-producer/app/domain"
-	"github.com/allora-network/allora-producer/util"
 	abci "github.com/cometbft/cometbft/abci/types"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cometbft/cometbft/types"
@@ -60,10 +58,10 @@ func (m *ProcessorService) ProcessBlock(ctx context.Context, block *coretypes.Re
 		return fmt.Errorf("block.Block is nil")
 	}
 
-	defer util.LogExecutionTime(time.Now(), "ProcessBlock", map[string]interface{}{
-		"height": block.Block.Header.Height,
-		"txs":    len(block.Block.Data.Txs),
-	})
+	// defer util.LogExecutionTime(time.Now(), "ProcessBlock", map[string]interface{}{
+	// 	"height": block.Block.Header.Height,
+	// 	"txs":    len(block.Block.Data.Txs),
+	// })
 
 	for i, tx := range block.Block.Data.Txs {
 		err := m.ProcessTransaction(ctx, tx, i, &block.Block.Header)
@@ -137,11 +135,11 @@ func (m *ProcessorService) ProcessBlockResults(ctx context.Context, blockResults
 		return fmt.Errorf("header is nil")
 	}
 
-	defer util.LogExecutionTime(time.Now(), "ProcessBlockResults", map[string]interface{}{
-		"height":                header.Height,
-		"tx results":            len(blockResults.TxsResults),
-		"finalize block events": len(blockResults.FinalizeBlockEvents),
-	})
+	// defer util.LogExecutionTime(time.Now(), "ProcessBlockResults", map[string]interface{}{
+	// 	"height":                header.Height,
+	// 	"tx results":            len(blockResults.TxsResults),
+	// 	"finalize block events": len(blockResults.FinalizeBlockEvents),
+	// })
 
 	for i, txResult := range blockResults.TxsResults {
 		if txResult == nil {

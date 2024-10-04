@@ -1,9 +1,7 @@
 FROM golang:1.22-alpine AS builder
 
 ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+    CGO_ENABLED=0
 
 WORKDIR /app
 
@@ -23,7 +21,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
 WORKDIR /home/appuser/
 
 COPY --from=builder /app/allora-producer .
-COPY --from=builder /app/config/config.yaml .
+COPY --from=builder /app/config.yaml .
 
 USER appuser
 

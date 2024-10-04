@@ -9,7 +9,7 @@ kafka:
 
 allora:
   rpc: "https://allora-rpc.testnet.allora.network"
-  timeout: 10
+  timeout: 10s
 
 log:
   level: 1 # -1: trace, 0: debug, 1: info, 2: warn, 3: error, 4: fatal, 5: panic, 6: nolevel, 7: disabled
@@ -17,7 +17,7 @@ log:
 producer:
   block_refresh_interval: 5s
   rate_limit_interval: 1s
-  num_workers: 6
+  num_workers: 3
 
 kafka_topic_router:
   - name: "domain-event.input.allora.staking"

@@ -24,8 +24,8 @@ type DatabaseConfig struct {
 }
 
 type AlloraConfig struct {
-	RPC     string `mapstructure:"rpc" validate:"required,url"`       // RPC URL of the Allora chain
-	Timeout uint   `mapstructure:"timeout" validate:"required,min=1"` // Timeout in seconds for RPC requests
+	RPC     string        `mapstructure:"rpc" validate:"required,url"` // RPC URL of the Allora chain
+	Timeout time.Duration `mapstructure:"timeout" validate:"required"` // Timeout in seconds for RPC requests
 }
 
 type KafkaTopicRouterConfig struct {
