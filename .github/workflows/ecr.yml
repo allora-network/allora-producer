@@ -1,9 +1,8 @@
 name: ECR
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 jobs:
   ecr:

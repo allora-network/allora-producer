@@ -1,9 +1,11 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.22-alpine
 
 ENV GO111MODULE=on \
     CGO_ENABLED=0
 
-WORKDIR /app
+RUN addgroup -S appgroup && adduser -S -D -h /home/appuser appuser -G appgroup
+
+WORKDIR /home/appuser/
 
 COPY go.mod go.sum ./
 
@@ -13,15 +15,7 @@ COPY . .
 
 RUN go build -o allora-producer ./cmd/producer
 
-FROM alpine:3.20
-
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
-    rm -rf /var/cache/apk/*
-
-WORKDIR /home/appuser/
-
-COPY --from=builder /app/allora-producer .
-COPY --from=builder /app/config/config.example.yaml ./config.yaml
+COPY ./config/config.example.yaml ./config.yaml
 
 USER appuser
 
