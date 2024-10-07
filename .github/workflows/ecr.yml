@@ -28,5 +28,8 @@ jobs:
           REPOSITORY: allora-producer
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest .
-          docker push $REGISTRY/$REPOSITORY --all-tags
+
+          GIT_TAG="$(echo $GITHUB_REF| sed 's#refs/tags/##')"
+
+          docker build -t $REGISTRY/$REPOSITORY:$GIT_TAG -t $REGISTRY/$REPOSITORY:$GIT_TAG .
+          docker push $REGISTRY/$REPOSITORY:$GIT_TAG
