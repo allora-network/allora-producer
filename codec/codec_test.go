@@ -355,3 +355,41 @@ func TestCodec_NewCodec(t *testing.T) {
 	c := NewCodec()
 	require.NotNil(t, c)
 }
+
+func TestCodec_ParseUntypedEvent(t *testing.T) {
+	c, _, _ := newTestCodec()
+
+	mockEvent := &abcitypes.Event{
+		Type: "test.event",
+		Attributes: []abcitypes.EventAttribute{
+			{Key: "key1", Value: "value1"},
+			{Key: "key2", Value: "value2"},
+		},
+	}
+
+	expectedEvent := map[string]string{
+		"key1": "value1",
+		"key2": "value2",
+	}
+
+	var expectedJSON json.RawMessage
+	expectedJSON, err := json.Marshal(expectedEvent)
+	require.NoError(t, err)
+
+	result, err := c.ParseUntypedEvent(mockEvent)
+	require.NoError(t, err)
+	require.Equal(t, expectedJSON, result)
+}
+
+func TestCodec_ParseUntypedEvent_NoAttributes(t *testing.T) {
+	c, _, _ := newTestCodec()
+
+	mockEvent := &abcitypes.Event{
+		Type:       "test.event",
+		Attributes: []abcitypes.EventAttribute{},
+	}
+
+	result, err := c.ParseUntypedEvent(mockEvent)
+	require.NoError(t, err)
+	require.Equal(t, json.RawMessage("{}"), result)
+}

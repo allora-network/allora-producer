@@ -54,6 +54,12 @@ kafka_topic_router:
   - name: "domain-event.input.allora.emascores"
     types:
       - "emissions.v4.EventEMAScoresSet"
+  - name: "domain-event.input.allora.validator-rewards"
+    types:
+      - "rewards"
+      - "commission"
+      - "withdraw_rewards"
+      - "withdraw_commission"
 
 filter_event:
   types:
@@ -64,6 +70,11 @@ filter_event:
     - "emissions.v4.EventNetworkLossSet"
     - "emissions.v4.EventRewardsSettled"
     - "emissions.v4.EventEMAScoresSet"
+    # Distribution
+    - "rewards"
+    - "commission"
+    - "withdraw_rewards"
+    - "withdraw_commission"
 
 filter_transaction: # TODO Rename to filter_message?
   types:

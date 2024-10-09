@@ -9,6 +9,7 @@ GOGET=$(GOCMD) get
 GOGENERATE=$(GOCMD) generate
 # Main package path
 MAIN_PACKAGE=./cmd/producer
+PWD=$(shell pwd)
 
 # Binary name
 BINARY_NAME=bin/allora-producer
@@ -39,7 +40,12 @@ run: build
 
 lint:
 	@echo "--> Running linter"
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61 run --timeout=10m --fix
+	docker run -t --rm -v $(PWD):/app -v ~/.cache/golangci-lint/v1.61.0:/root/.cache -w /app golangci/golangci-lint:v1.61.0 golangci-lint run -v
+
+lint-local:
+	@echo "--> Running linter"
+	golangci-lint run --timeout=10m
+
 
 cover:
 	mkdir -p coverage

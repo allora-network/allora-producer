@@ -182,13 +182,22 @@ func (m *ProcessorService) ProcessEvent(ctx context.Context, event *abci.Event, 
 		return nil
 	}
 
-	msg, err := m.codec.ParseEvent(event)
-	if err != nil {
-		return fmt.Errorf("failed to parse event: %w", err)
-	}
-	jsonMsg, err := m.codec.MarshalProtoJSON(msg)
-	if err != nil {
-		return fmt.Errorf("failed to marshal event: %w", err)
+	var jsonMsg json.RawMessage
+	var err error
+	if m.codec.IsTypedEvent(event) {
+		msg, err := m.codec.ParseEvent(event)
+		if err != nil {
+			return fmt.Errorf("failed to parse event: %w", err)
+		}
+		jsonMsg, err = m.codec.MarshalProtoJSON(msg)
+		if err != nil {
+			return fmt.Errorf("failed to marshal event: %w", err)
+		}
+	} else {
+		jsonMsg, err = m.codec.ParseUntypedEvent(event)
+		if err != nil {
+			return fmt.Errorf("failed to parse untyped event: %w", err)
+		}
 	}
 
 	metadata := domain.NewMetadata(header.Height, header.ChainID, header.Hash().String(), header.Time, 0, "", event.Type)

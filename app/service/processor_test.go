@@ -131,6 +131,7 @@ func TestProcessorService_ProcessEvent(t *testing.T) {
 	parsedEvent := &codectypes.Any{TypeUrl: "/test.Event"}
 
 	mockEventFilter.On("ShouldProcess", event).Return(true)
+	mockCodec.On("IsTypedEvent", event).Return(true)
 	mockCodec.On("ParseEvent", event).Return(parsedEvent, nil)
 	mockCodec.On("MarshalProtoJSON", parsedEvent).Return(json.RawMessage(`{"event":"data"}`), nil)
 	mockKafka.On("PublishAsync", mock.Anything, "test_event", mock.Anything, mock.Anything).Return(nil)
@@ -200,11 +201,13 @@ func TestProcessorService_ProcessBlockResults(t *testing.T) {
 	parsedEvent2 := &codectypes.Any{TypeUrl: "/test.FinalizeEvent"}
 
 	mockEventFilter.On("ShouldProcess", event1).Return(true)
+	mockCodec.On("IsTypedEvent", event1).Return(true)
 	mockCodec.On("ParseEvent", event1).Return(parsedEvent1, nil)
 	mockCodec.On("MarshalProtoJSON", parsedEvent1).Return(json.RawMessage(`{"event":"tx_event"}`), nil)
 	mockKafka.On("PublishAsync", mock.Anything, "tx_event", mock.Anything, mock.Anything).Return(nil)
 
 	mockEventFilter.On("ShouldProcess", event2).Return(true)
+	mockCodec.On("IsTypedEvent", event2).Return(true)
 	mockCodec.On("ParseEvent", event2).Return(parsedEvent2, nil)
 	mockCodec.On("MarshalProtoJSON", parsedEvent2).Return(json.RawMessage(`{"event":"finalize_event"}`), nil)
 	mockKafka.On("PublishAsync", mock.Anything, "finalize_event", mock.Anything, mock.Anything).Return(nil)

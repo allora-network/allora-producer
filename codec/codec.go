@@ -13,6 +13,7 @@ import (
 	cosmossdktypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distribution "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	slashing "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/gogoproto/proto"
@@ -63,6 +64,7 @@ var defaultRegisterFuncs = []func(codectypes.InterfaceRegistry){
 	bank.RegisterInterfaces,
 	staking.RegisterInterfaces,
 	slashing.RegisterInterfaces,
+	distribution.RegisterInterfaces,
 	// Allora types
 	emissions.RegisterInterfaces,
 	mint.RegisterInterfaces,
@@ -156,4 +158,22 @@ func (c *Codec) MarshalProtoJSON(event proto.Message) (json.RawMessage, error) {
 		return nil, fmt.Errorf("failed to marshal json: %w", err)
 	}
 	return jsonEvent, nil
+}
+
+func (c *Codec) ParseUntypedEvent(event *abcitypes.Event) (json.RawMessage, error) {
+	attrMap := make(map[string]string)
+	for _, attr := range event.Attributes {
+		attrMap[attr.Key] = attr.Value
+	}
+
+	attrBytes, err := json.Marshal(attrMap)
+	if err != nil {
+		return nil, err
+	}
+	return attrBytes, nil
+}
+
+func (c *Codec) IsTypedEvent(event *abcitypes.Event) bool {
+	concreteGoType := proto.MessageType(event.Type)
+	return concreteGoType != nil
 }

@@ -21,86 +21,26 @@ import (
 func main() {
 	log.Info().Msg("Starting Allora Chain Producers")
 	// Load config
-	cfgProvider := config.NewProvider(config.NewViperAdapter())
-	cfg, err := cfgProvider.InitConfig()
+	cfg, err := initializeConfig()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load config")
 	}
 
-	zerolog.SetGlobalLevel(zerolog.Level(cfg.Log.Level))
-
-	// Validate config
-	if err := config.ValidateConfig(&cfg); err != nil {
-		log.Fatal().Err(err).Msg("invalid config")
-	}
+	initializeLogging(cfg.Log.Level)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	// Handle OS signals
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		sig := <-sigChan
-		log.Info().Msgf("Received signal: %v. Shutting down...", sig)
-		cancel()
-	}()
+	setupSignalHandler(cancel)
 
-	alloraClient, err := infra.NewAlloraClient(cfg.Allora.RPC, cfg.Allora.Timeout)
+	appInstance, cleanup, err := initializeApp(ctx, cfg)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create allora client")
+		log.Fatal().Err(err).Msg("failed to initialize app")
 	}
+	defer cleanup()
 
-	topicRouter := infra.NewTopicRouter(getTopicMapping(cfg))
-	// Instantiate Franz client
-	franzClient, err := infra.NewFranzClient(cfg.Kafka.Seeds, cfg.Kafka.User, cfg.Kafka.Password)
-	if err != nil {
-		log.Fatal().Err(err).Str("component", "KafkaClient").Msg("failed to create Kafka client")
-	}
-	kafkaClient, err := infra.NewKafkaClient(franzClient, topicRouter)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create Kafka client")
-	}
-	defer kafkaClient.Close()
-
-	codec := codec.NewCodec()
-
-	eventFilter := service.NewFilterEvent(
-		cfg.FilterEvent.Types...,
-	)
-
-	transactionMessageFilter := service.NewFilterTransactionMessage(
-		cfg.FilterTransaction.Types...,
-	)
-
-	db, err := pgxpool.Connect(ctx, cfg.Database.URL)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create pg client")
-	}
-	defer db.Close()
-	processedBlockRepository, err := infra.NewPgProcessedBlock(db)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create processed block repository")
-	}
-
-	processorService, err := service.NewProcessorService(kafkaClient, codec, eventFilter, transactionMessageFilter)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create processor service")
-	}
-	eventsProducer, err := usecase.NewEventsProducer(processorService, alloraClient, processedBlockRepository, 0,
-		cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval, cfg.Producer.NumWorkers)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create events producer use case")
-	}
-	transactionsProducer, err := usecase.NewTransactionsProducer(processorService, alloraClient, processedBlockRepository, 0,
-		cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval, cfg.Producer.NumWorkers)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create transactions producer use case")
-	}
-
-	app := app.NewApp(eventsProducer, transactionsProducer)
-
-	if err := app.Run(ctx); err != nil {
+	if err := appInstance.Run(ctx); err != nil {
 		log.Fatal().Err(err).Msg("failed to run app")
 	}
 }
@@ -113,4 +53,94 @@ func getTopicMapping(cfg config.Config) map[string]string {
 		}
 	}
 	return topicMapping
+}
+
+func initializeConfig() (config.Config, error) {
+	cfgProvider := config.NewProvider(config.NewViperAdapter())
+	cfg, err := cfgProvider.InitConfig()
+	if err != nil {
+		return cfg, err
+	}
+
+	if err := config.ValidateConfig(&cfg); err != nil {
+		return cfg, err
+	}
+
+	return cfg, nil
+}
+
+func initializeLogging(level int8) {
+	zerolog.SetGlobalLevel(zerolog.Level(level))
+}
+
+func setupSignalHandler(cancel context.CancelFunc) {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		sig := <-sigChan
+		log.Info().Msgf("Received signal: %v. Shutting down...", sig)
+		cancel()
+	}()
+}
+
+func initializeApp(ctx context.Context, cfg config.Config) (*app.App, func(), error) {
+	alloraClient, err := infra.NewAlloraClient(cfg.Allora.RPC, cfg.Allora.Timeout)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	topicRouter := infra.NewTopicRouter(getTopicMapping(cfg))
+
+	franzClient, err := infra.NewFranzClient(cfg.Kafka.Seeds, cfg.Kafka.User, cfg.Kafka.Password)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	kafkaClient, err := infra.NewKafkaClient(franzClient, topicRouter)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	codec := codec.NewCodec()
+
+	eventFilter := service.NewFilterEvent(cfg.FilterEvent.Types...)
+	transactionMessageFilter := service.NewFilterTransactionMessage(cfg.FilterTransaction.Types...)
+
+	db, err := pgxpool.Connect(ctx, cfg.Database.URL)
+	if err != nil {
+		return nil, nil, err
+	}
+	// defer db.Close()
+
+	processedBlockRepository, err := infra.NewPgProcessedBlock(db)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	processorService, err := service.NewProcessorService(kafkaClient, codec, eventFilter, transactionMessageFilter)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	eventsProducer, err := usecase.NewEventsProducer(processorService, alloraClient, processedBlockRepository, 0,
+		cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval, cfg.Producer.NumWorkers)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	transactionsProducer, err := usecase.NewTransactionsProducer(processorService, alloraClient, processedBlockRepository, 0,
+		cfg.Producer.BlockRefreshInterval, cfg.Producer.RateLimitInterval, cfg.Producer.NumWorkers)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cleanup := func() {
+		if db != nil {
+			db.Close()
+			log.Info().Msg("Database connection closed")
+		}
+		// Add other cleanup tasks if necessary
+	}
+
+	return app.NewApp(eventsProducer, transactionsProducer), cleanup, nil
 }

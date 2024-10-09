@@ -29,6 +29,52 @@ func (_m *CodecInterface) EXPECT() *CodecInterface_Expecter {
 	return &CodecInterface_Expecter{mock: &_m.Mock}
 }
 
+// IsTypedEvent provides a mock function with given fields: event
+func (_m *CodecInterface) IsTypedEvent(event *types.Event) bool {
+	ret := _m.Called(event)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsTypedEvent")
+	}
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(*types.Event) bool); ok {
+		r0 = rf(event)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
+// CodecInterface_IsTypedEvent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsTypedEvent'
+type CodecInterface_IsTypedEvent_Call struct {
+	*mock.Call
+}
+
+// IsTypedEvent is a helper method to define mock.On call
+//   - event *types.Event
+func (_e *CodecInterface_Expecter) IsTypedEvent(event interface{}) *CodecInterface_IsTypedEvent_Call {
+	return &CodecInterface_IsTypedEvent_Call{Call: _e.mock.On("IsTypedEvent", event)}
+}
+
+func (_c *CodecInterface_IsTypedEvent_Call) Run(run func(event *types.Event)) *CodecInterface_IsTypedEvent_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(*types.Event))
+	})
+	return _c
+}
+
+func (_c *CodecInterface_IsTypedEvent_Call) Return(_a0 bool) *CodecInterface_IsTypedEvent_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *CodecInterface_IsTypedEvent_Call) RunAndReturn(run func(*types.Event) bool) *CodecInterface_IsTypedEvent_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // MarshalProtoJSON provides a mock function with given fields: event
 func (_m *CodecInterface) MarshalProtoJSON(event proto.Message) (json.RawMessage, error) {
 	ret := _m.Called(event)
@@ -315,6 +361,64 @@ func (_c *CodecInterface_ParseTxMessages_Call) Return(_a0 []proto.Message, _a1 e
 }
 
 func (_c *CodecInterface_ParseTxMessages_Call) RunAndReturn(run func([]*codectypes.Any) ([]proto.Message, error)) *CodecInterface_ParseTxMessages_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ParseUntypedEvent provides a mock function with given fields: event
+func (_m *CodecInterface) ParseUntypedEvent(event *types.Event) (json.RawMessage, error) {
+	ret := _m.Called(event)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParseUntypedEvent")
+	}
+
+	var r0 json.RawMessage
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*types.Event) (json.RawMessage, error)); ok {
+		return rf(event)
+	}
+	if rf, ok := ret.Get(0).(func(*types.Event) json.RawMessage); ok {
+		r0 = rf(event)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(json.RawMessage)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*types.Event) error); ok {
+		r1 = rf(event)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CodecInterface_ParseUntypedEvent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ParseUntypedEvent'
+type CodecInterface_ParseUntypedEvent_Call struct {
+	*mock.Call
+}
+
+// ParseUntypedEvent is a helper method to define mock.On call
+//   - event *types.Event
+func (_e *CodecInterface_Expecter) ParseUntypedEvent(event interface{}) *CodecInterface_ParseUntypedEvent_Call {
+	return &CodecInterface_ParseUntypedEvent_Call{Call: _e.mock.On("ParseUntypedEvent", event)}
+}
+
+func (_c *CodecInterface_ParseUntypedEvent_Call) Run(run func(event *types.Event)) *CodecInterface_ParseUntypedEvent_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(*types.Event))
+	})
+	return _c
+}
+
+func (_c *CodecInterface_ParseUntypedEvent_Call) Return(_a0 json.RawMessage, _a1 error) *CodecInterface_ParseUntypedEvent_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *CodecInterface_ParseUntypedEvent_Call) RunAndReturn(run func(*types.Event) (json.RawMessage, error)) *CodecInterface_ParseUntypedEvent_Call {
 	_c.Call.Return(run)
 	return _c
 }
