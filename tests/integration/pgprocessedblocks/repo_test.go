@@ -55,6 +55,7 @@ func (s *ProcessedBlockRepositoryTestSuite) SetupSuite() {
 }
 
 func (s *ProcessedBlockRepositoryTestSuite) TearDownSuite() {
+	s.db.Close()
 	err := s.pgContainer.Terminate(s.ctx)
 	s.NoError(err)
 }
