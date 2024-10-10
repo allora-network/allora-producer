@@ -82,6 +82,10 @@ func NewCodec() *Codec {
 	return &Codec{interfaceRegistry: interfaceRegistry, codec: codec, sdkTypes: DefaultSDKTypes{}}
 }
 
+func NewCodecWithInterfaces(interfaceRegistry codectypes.InterfaceRegistry, codec ProtoCodec, sdkTypes SDKTypes) *Codec {
+	return &Codec{interfaceRegistry: interfaceRegistry, codec: codec, sdkTypes: sdkTypes}
+}
+
 func registerInterfaces(interfaceRegistry codectypes.InterfaceRegistry, registerFuncs ...func(codectypes.InterfaceRegistry)) {
 	for _, registerFunc := range registerFuncs {
 		registerFunc(interfaceRegistry)

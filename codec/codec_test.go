@@ -7,6 +7,7 @@ import (
 
 	emissionsv3 "github.com/allora-network/allora-producer/codec/allora-chain/x/emissions/v3types"
 	abcitypes "github.com/cometbft/cometbft/abci/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -353,6 +354,14 @@ func TestCodec_ParseEvent_WithParseTypedEventError(t *testing.T) {
 
 func TestCodec_NewCodec(t *testing.T) {
 	c := NewCodec()
+	require.NotNil(t, c)
+}
+
+func TestCodec_NewWithInterfaces(t *testing.T) {
+	interfaceRegistry := codectypes.NewInterfaceRegistry()
+	codec := codec.NewProtoCodec(interfaceRegistry)
+	sdkTypes := DefaultSDKTypes{}
+	c := NewCodecWithInterfaces(interfaceRegistry, codec, sdkTypes)
 	require.NotNil(t, c)
 }
 
