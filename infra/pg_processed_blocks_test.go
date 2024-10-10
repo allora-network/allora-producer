@@ -29,12 +29,21 @@ func TestGetLastProcessedBlock_Success(t *testing.T) {
 		Status:      "success",
 	}
 
-	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_blocks ORDER BY height DESC LIMIT 1").
+	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_blocks WHERE status = $1 ORDER BY height DESC LIMIT 1", domain.StatusCompleted).
 		Return(mockRow)
-	mockRow.On("Scan", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+	mockRow.On("Scan", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 		if len(args) > 0 {
-			if blockPtr, ok := args[0].(*domain.ProcessedBlock); ok {
-				*blockPtr = expectedBlock
+			if idPtr, ok := args[0].(*int64); ok {
+				*idPtr = expectedBlock.ID
+			}
+			if heightPtr, ok := args[1].(*int64); ok {
+				*heightPtr = expectedBlock.Height
+			}
+			if processedAtPtr, ok := args[2].(*time.Time); ok {
+				*processedAtPtr = expectedBlock.ProcessedAt
+			}
+			if statusPtr, ok := args[3].(*string); ok {
+				*statusPtr = expectedBlock.Status
 			}
 		}
 	})
@@ -53,9 +62,9 @@ func TestGetLastProcessedBlock_NoRows(t *testing.T) {
 	require.NoError(t, err)
 
 	mockRow := new(mocks.RowInterface)
-	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_blocks ORDER BY height DESC LIMIT 1").
+	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_blocks WHERE status = $1 ORDER BY height DESC LIMIT 1", domain.StatusCompleted).
 		Return(mockRow)
-	mockRow.On("Scan", mock.Anything).Return(pgx.ErrNoRows)
+	mockRow.On("Scan", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(pgx.ErrNoRows)
 
 	block, err := repo.GetLastProcessedBlock(context.Background())
 	require.NoError(t, err)
@@ -71,9 +80,9 @@ func TestGetLastProcessedBlock_Error(t *testing.T) {
 	require.NoError(t, err)
 
 	mockRow := new(mocks.RowInterface)
-	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_blocks ORDER BY height DESC LIMIT 1").
+	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_blocks WHERE status = $1 ORDER BY height DESC LIMIT 1", domain.StatusCompleted).
 		Return(mockRow)
-	mockRow.On("Scan", mock.Anything).Return(errors.New("scan error"))
+	mockRow.On("Scan", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(errors.New("scan error"))
 
 	block, err := repo.GetLastProcessedBlock(context.Background())
 	require.Error(t, err)
@@ -140,12 +149,21 @@ func TestGetLastProcessedBlockEvent_Success(t *testing.T) {
 		Status:      "success",
 	}
 
-	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_block_events ORDER BY height DESC LIMIT 1").
+	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_block_events WHERE status = $1 ORDER BY height DESC LIMIT 1", domain.StatusCompleted).
 		Return(mockRow)
-	mockRow.On("Scan", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+	mockRow.On("Scan", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 		if len(args) > 0 {
-			if eventPtr, ok := args[0].(*domain.ProcessedBlockEvent); ok {
-				*eventPtr = expectedEvent
+			if idPtr, ok := args[0].(*int64); ok {
+				*idPtr = expectedEvent.ID
+			}
+			if heightPtr, ok := args[1].(*int64); ok {
+				*heightPtr = expectedEvent.Height
+			}
+			if processedAtPtr, ok := args[2].(*time.Time); ok {
+				*processedAtPtr = expectedEvent.ProcessedAt
+			}
+			if statusPtr, ok := args[3].(*string); ok {
+				*statusPtr = expectedEvent.Status
 			}
 		}
 	})
@@ -164,9 +182,9 @@ func TestGetLastProcessedBlockEvent_NoRows(t *testing.T) {
 	require.NoError(t, err)
 
 	mockRow := new(mocks.RowInterface)
-	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_block_events ORDER BY height DESC LIMIT 1").
+	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_block_events WHERE status = $1 ORDER BY height DESC LIMIT 1", domain.StatusCompleted).
 		Return(mockRow)
-	mockRow.On("Scan", mock.Anything).Return(pgx.ErrNoRows)
+	mockRow.On("Scan", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(pgx.ErrNoRows)
 
 	event, err := repo.GetLastProcessedBlockEvent(context.Background())
 	require.NoError(t, err)
@@ -182,9 +200,9 @@ func TestGetLastProcessedBlockEvent_Error(t *testing.T) {
 	require.NoError(t, err)
 
 	mockRow := new(mocks.RowInterface)
-	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_block_events ORDER BY height DESC LIMIT 1").
+	mockPool.On("QueryRow", mock.Anything, "SELECT * FROM processed_block_events WHERE status = $1 ORDER BY height DESC LIMIT 1", domain.StatusCompleted).
 		Return(mockRow)
-	mockRow.On("Scan", mock.Anything).Return(errors.New("scan error"))
+	mockRow.On("Scan", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(errors.New("scan error"))
 
 	event, err := repo.GetLastProcessedBlockEvent(context.Background())
 	require.Error(t, err)

@@ -43,9 +43,9 @@ func NewPgProcessedBlock(db DBPool) (domain.ProcessedBlockRepositoryInterface, e
 
 // GetLastProcessedBlock retrieves the last processed block from the database
 func (p *pgProcessedBlock) GetLastProcessedBlock(ctx context.Context) (domain.ProcessedBlock, error) {
-	query := fmt.Sprintf("SELECT * FROM %s ORDER BY height DESC LIMIT 1", tableProcessedBlocks)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE status = $1 ORDER BY height DESC LIMIT 1", tableProcessedBlocks)
 	var block domain.ProcessedBlock
-	err := p.db.QueryRow(ctx, query).Scan(&block)
+	err := p.db.QueryRow(ctx, query, domain.StatusCompleted).Scan(&block.ID, &block.Height, &block.ProcessedAt, &block.Status)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			// Handle the case where there are no rows in the table
@@ -68,9 +68,9 @@ func (p *pgProcessedBlock) SaveProcessedBlock(ctx context.Context, block domain.
 
 // GetProcessedBlockEvent retrieves a processed block event from the database
 func (p *pgProcessedBlock) GetLastProcessedBlockEvent(ctx context.Context) (domain.ProcessedBlockEvent, error) {
-	query := fmt.Sprintf("SELECT * FROM %s ORDER BY height DESC LIMIT 1", tableProcessedBlockEvents)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE status = $1 ORDER BY height DESC LIMIT 1", tableProcessedBlockEvents)
 	var event domain.ProcessedBlockEvent
-	err := p.db.QueryRow(ctx, query).Scan(&event)
+	err := p.db.QueryRow(ctx, query, domain.StatusCompleted).Scan(&event.ID, &event.Height, &event.ProcessedAt, &event.Status)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return domain.ProcessedBlockEvent{}, nil
@@ -85,6 +85,57 @@ func (p *pgProcessedBlock) SaveProcessedBlockEvent(ctx context.Context, event do
 	_, err := p.db.Exec(ctx, query, event.Height, event.ProcessedAt, event.Status)
 	if err != nil {
 		return fmt.Errorf("failed to save processed block event: %w", err)
+	}
+	return nil
+}
+
+func CreateTables(ctx context.Context, db DBPool) error {
+	err := createTableAndIndex(ctx, db, tableProcessedBlocks)
+	if err != nil {
+		return fmt.Errorf("failed to setup processed block tables: %w", err)
+	}
+
+	err = createTableAndIndex(ctx, db, tableProcessedBlockEvents)
+	if err != nil {
+		return fmt.Errorf("failed to setup processed block tables: %w", err)
+	}
+
+	return nil
+}
+
+func createTableAndIndex(ctx context.Context, db DBPool, table string) error {
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id SERIAL PRIMARY KEY, height BIGINT NOT NULL, processed_at TIMESTAMP NOT NULL DEFAULT now(), status TEXT NOT NULL);", table)
+	_, err := db.Exec(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to create table: %w", err)
+	}
+
+	query = fmt.Sprintf("CREATE INDEX ON %s (height);", table)
+	_, err = db.Exec(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to create index: %w", err)
+	}
+
+	query = fmt.Sprintf("CREATE INDEX ON %s (processed_at);", table)
+	_, err = db.Exec(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to create index: %w", err)
+	}
+
+	query = fmt.Sprintf("CREATE INDEX ON %s (status);", table)
+	_, err = db.Exec(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to create index: %w", err)
+	}
+
+	return nil
+}
+
+func DropTables(ctx context.Context, db DBPool) error {
+	query := fmt.Sprintf("DROP TABLE IF EXISTS %s; DROP TABLE IF EXISTS %s", tableProcessedBlocks, tableProcessedBlockEvents)
+	_, err := db.Exec(ctx, query)
+	if err != nil {
+		return fmt.Errorf("failed to drop tables: %w", err)
 	}
 	return nil
 }
