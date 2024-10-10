@@ -79,14 +79,15 @@ func (s *KafkaClientTestSuite) SetupTest() {
 }
 
 func (s *KafkaClientTestSuite) TearDownTest() {
-	_, err := s.adminClient.DeleteTopics(s.ctx, topicName)
-	s.Require().NoError(err)
-
-	err = s.producer.Flush(s.ctx)
+	err := s.producer.Flush(s.ctx)
 	s.Require().NoError(err)
 
 	err = s.consumer.Flush(s.ctx)
 	s.Require().NoError(err)
+
+	resp, err := s.adminClient.DeleteTopics(s.ctx, topicName)
+	s.Require().NoError(err)
+	s.Require().Len(resp, 1)
 }
 
 func (s *KafkaClientTestSuite) TestPublishAsync() {
