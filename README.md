@@ -10,6 +10,10 @@ This repository implements a service to monitor Allora Chain blocks, parse speci
 - Offers flexible configuration for data processing and topic associations
 - Optimized for efficient processing and near real-time data handling
 
+## Architecture Diagram
+
+![Architecture Diagram](images/architecture.png)
+
 ## Configuration
 
 Transactions, events, and their associations with Kafka topics are configurable.

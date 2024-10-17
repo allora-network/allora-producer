@@ -60,12 +60,16 @@ kafka_topic_router:
       - "commission"
       - "withdraw_rewards"
       - "withdraw_commission"
+  - name: "domain-event.input.allora.fund-topic"
+    types:
+      - "emissions.v3.MsgFundTopic"
 
 filter_event:
   types:
     # v3
     - "emissions.v3.EventNetworkLossSet"
     - "emissions.v3.EventRewardsSettled"
+    - "emissions.v3.MsgFundTopic"
     # v4
     - "emissions.v4.EventNetworkLossSet"
     - "emissions.v4.EventRewardsSettled"
