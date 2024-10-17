@@ -60,6 +60,9 @@ kafka_topic_router:
       - "commission"
       - "withdraw_rewards"
       - "withdraw_commission"
+  - name: "domain-event.input.allora.fund-topic"
+    types:
+      - "emissions.v3.MsgFundTopic"
 
 filter_event:
   types:
@@ -86,6 +89,7 @@ filter_transaction: # TODO Rename to filter_message?
     - "emissions.v3.MsgRemoveRegistration"
     - "emissions.v3.StakeInfo" # Only v3
     - "emissions.v3.DelegateStakeRemovalInfo" # Only v3
+    - "emissions.v3.MsgFundTopic" # Only v3
     # emissions.v4
     - "emissions.v4.AddStakeRequest"
     - "emissions.v4.RemoveStakeRequest"

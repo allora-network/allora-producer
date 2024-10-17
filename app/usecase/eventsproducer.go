@@ -53,7 +53,7 @@ func (m *EventsProducer) Execute(ctx context.Context) error {
 }
 
 func (m *EventsProducer) processBlockResults(ctx context.Context, height int64) error {
-	util.LogExecutionTime(time.Now(), "EventsProducer.processBlockResults", map[string]interface{}{"height": height}, m.logger)
+	defer util.LogExecutionTime(time.Now(), "EventsProducer.processBlockResults", map[string]interface{}{"height": height}, m.logger)
 	m.logger.Info().Int64("height", height).Msg("EventsProducer.processBlockResults")
 	// Fetch BlockResults
 	blockResults, err := m.alloraClient.GetBlockResults(ctx, height)

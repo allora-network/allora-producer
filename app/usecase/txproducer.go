@@ -53,7 +53,7 @@ func (m *TransactionsProducer) Execute(ctx context.Context) error {
 }
 
 func (m *TransactionsProducer) processBlock(ctx context.Context, height int64) error {
-	util.LogExecutionTime(time.Now(), "TransactionsProducer.processBlock", map[string]interface{}{"height": height}, m.logger)
+	defer util.LogExecutionTime(time.Now(), "TransactionsProducer.processBlock", map[string]interface{}{"height": height}, m.logger)
 	m.logger.Info().Int64("height", height).Msg("TransactionsProducer.processBlock")
 	// Fetch Block
 	block, err := m.alloraClient.GetBlockByHeight(ctx, height)

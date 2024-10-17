@@ -7,85 +7,49 @@ import (
 	"time"
 
 	"github.com/allora-network/allora-producer/infra"
+	"github.com/allora-network/allora-producer/testutil"
 	"github.com/stretchr/testify/suite"
-	"github.com/testcontainers/testcontainers-go/modules/kafka"
-
-	"github.com/twmb/franz-go/pkg/kadm"
-	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 type KafkaClientTestSuite struct {
 	suite.Suite
 	ctx context.Context
 
-	kafkaContainer *kafka.KafkaContainer
-	producer       *kgo.Client
-	adminClient    *kadm.Client
-	consumer       *kgo.Client
+	kafkaTestEnv *testutil.KafkaTestEnv
 }
 
 const (
 	topicName = "test-topic"
+	clusterID = "test-cluster"
 )
 
 func (s *KafkaClientTestSuite) SetupSuite() {
 	s.ctx = context.Background()
 
-	kafkaContainer, err := kafka.Run(s.ctx,
-		"confluentinc/confluent-local:7.5.0",
-		kafka.WithClusterID("test-cluster"),
-	)
+	kafkaTestEnv, err := testutil.NewKafkaTestEnv(s.ctx, clusterID, []string{topicName})
 	s.Require().NoError(err)
 
-	s.kafkaContainer = kafkaContainer
-
-	brokers, err := kafkaContainer.Brokers(s.ctx)
-	s.Require().NoError(err)
-
-	opts := []kgo.Opt{
-		kgo.SeedBrokers(brokers...),
-		kgo.ProducerBatchCompression(kgo.SnappyCompression()),
-		kgo.RequiredAcks(kgo.AllISRAcks()),
-		kgo.ProducerBatchMaxBytes(16e6),
-		kgo.MaxBufferedRecords(1e6),
-		kgo.MetadataMaxAge(60 * time.Second),
-		kgo.RecordPartitioner(kgo.UniformBytesPartitioner(1e6, false, true, nil)),
-	}
-	s.producer, err = kgo.NewClient(opts...)
-	s.Require().NoError(err)
-
-	s.adminClient = kadm.NewClient(s.producer)
-
-	consumerOpts := []kgo.Opt{
-		kgo.SeedBrokers(brokers...),
-		kgo.ConsumeTopics(topicName),
-	}
-	s.consumer, err = kgo.NewClient(consumerOpts...)
-	s.Require().NoError(err)
+	s.kafkaTestEnv = kafkaTestEnv
 }
 
 func (s *KafkaClientTestSuite) TearDownSuite() {
-	s.producer.Close()
-	s.consumer.Close()
-	err := s.kafkaContainer.Terminate(s.ctx)
-	s.Require().NoError(err)
+	s.kafkaTestEnv.Close(s.ctx)
 }
 
 func (s *KafkaClientTestSuite) SetupTest() {
 	// Add topics to Kafka
-	resp, err := s.adminClient.CreateTopics(s.ctx, -1, -1, nil, topicName)
+	err := s.kafkaTestEnv.CreateTopics(s.ctx, topicName)
 	s.Require().NoError(err)
-	s.Require().Len(resp, 1)
 }
 
 func (s *KafkaClientTestSuite) TearDownTest() {
-	err := s.producer.Flush(s.ctx)
+	err := s.kafkaTestEnv.Producer.Flush(s.ctx)
 	s.Require().NoError(err)
 
-	err = s.consumer.Flush(s.ctx)
+	err = s.kafkaTestEnv.Consumer.Flush(s.ctx)
 	s.Require().NoError(err)
 
-	resp, err := s.adminClient.DeleteTopics(s.ctx, topicName)
+	resp, err := s.kafkaTestEnv.AdminClient.DeleteTopics(s.ctx, topicName)
 	s.Require().NoError(err)
 	s.Require().Len(resp, 1)
 }
@@ -95,19 +59,19 @@ func (s *KafkaClientTestSuite) TestPublishAsync() {
 		"test-type": topicName,
 	})
 
-	streamClient, err := infra.NewKafkaClient(s.producer, topicRouter)
+	client, err := infra.NewKafkaClient(s.kafkaTestEnv.Producer, topicRouter)
 	s.Require().NoError(err)
 
 	jsonMsg := json.RawMessage(`{"test": "test"}`)
-	err = streamClient.PublishAsync(s.ctx, "test-type", jsonMsg, 1)
+	err = client.PublishAsync(s.ctx, "test-type", jsonMsg, 1)
 	s.Require().NoError(err)
-	err = s.producer.Flush(s.ctx)
+	err = s.kafkaTestEnv.Producer.Flush(s.ctx)
 	s.Require().NoError(err)
 
 	time.Sleep(2 * time.Second)
 
 	// Consume message
-	fetches := s.consumer.PollFetches(s.ctx)
+	fetches := s.kafkaTestEnv.Consumer.PollFetches(s.ctx)
 	iter := fetches.RecordIter()
 
 	for !iter.Done() {
