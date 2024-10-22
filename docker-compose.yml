@@ -2,6 +2,8 @@ services:
   producer:
     build:
       context: .
+      args:
+        CHAIN_NAME: ${CHAIN_NAME:-allora-localnet-1}
       dockerfile: Dockerfile
     environment:
       - ALLORA_DATABASE_URL=${ALLORA_DATABASE_URL}

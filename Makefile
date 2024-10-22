@@ -42,6 +42,7 @@ lint:
 	@echo "--> Running linter"
 	docker run -t --rm -v $(PWD):/app -v ~/.cache/golangci-lint/v1.61.0:/root/.cache -w /app golangci/golangci-lint:v1.61.0 golangci-lint run -v
 
+# golangci-lint must be installed locally. It's the fastest way to run the linter.
 lint-local:
 	@echo "--> Running linter"
 	golangci-lint run --timeout=10m

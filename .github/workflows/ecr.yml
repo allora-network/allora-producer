@@ -31,5 +31,20 @@ jobs:
 
           GIT_TAG="$(echo $GITHUB_REF| sed 's#refs/tags/##')"
 
-          docker build -t $REGISTRY/$REPOSITORY:$GIT_TAG -t $REGISTRY/$REPOSITORY:$GIT_TAG .
+          # Testnet
+          CHAIN_NAME="allora-testnet-1"
+          docker build -t $REGISTRY/$REPOSITORY:$GIT_TAG --build-arg CHAIN_NAME=${CHAIN_NAME} .
           docker push $REGISTRY/$REPOSITORY:$GIT_TAG
+
+          docker build -t $REGISTRY/$REPOSITORY/${CHAIN_NAME}:$GIT_TAG --build-arg CHAIN_NAME=${CHAIN_NAME} .
+          docker push $REGISTRY/$REPOSITORY/${CHAIN_NAME}:$GIT_TAG
+
+          # Mainnet
+          CHAIN_NAME="allora-mainnet-1"
+          docker build -t $REGISTRY/$REPOSITORY/${CHAIN_NAME}:$GIT_TAG --build-arg CHAIN_NAME=${CHAIN_NAME} .
+          docker push $REGISTRY/$REPOSITORY/${CHAIN_NAME}:$GIT_TAG
+
+          # Devnet
+          CHAIN_NAME="allora-devnet-1"
+          docker build -t $REGISTRY/$REPOSITORY/${CHAIN_NAME}:$GIT_TAG --build-arg CHAIN_NAME=${CHAIN_NAME} .
+          docker push $REGISTRY/$REPOSITORY/${CHAIN_NAME}:$GIT_TAG

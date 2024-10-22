@@ -164,10 +164,10 @@ func TestValidate(t *testing.T) {
 }
 
 func TestInitConfig_Load(t *testing.T) {
-	// If config.yaml doesn't exist, copy config.yaml.example to config.yaml
+	// If config.yaml doesn't exist, copy config.allora-localnet-1.yaml to config.yaml
 	configCreated := false
 	if _, err := os.Stat("config.yaml"); os.IsNotExist(err) {
-		input, err := os.ReadFile("config.example.yaml")
+		input, err := os.ReadFile("config.allora-localnet-1.yaml")
 		require.NoError(t, err)
 
 		err = os.WriteFile("config.yaml", input, 0600)
@@ -194,7 +194,7 @@ func TestInitConfig_Load(t *testing.T) {
 func TestViperAdapter(t *testing.T) {
 	adapter := config.NewViperAdapter()
 	adapter.AddConfigPath("./")
-	adapter.SetConfigName("config.example")
+	adapter.SetConfigName("config.allora-localnet-1")
 	adapter.SetConfigType("yaml")
 	adapter.SetEnvPrefix("ALLORA")
 	adapter.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -206,7 +206,7 @@ func TestViperAdapter(t *testing.T) {
 	configFileUsed := adapter.ConfigFileUsed()
 	wd, err := os.Getwd()
 	require.NoError(t, err)
-	assert.Equal(t, wd+"/config.example.yaml", configFileUsed)
+	assert.Equal(t, wd+"/config.allora-localnet-1.yaml", configFileUsed)
 
 	cfg := config.Config{}
 	err = adapter.Unmarshal(&cfg)

@@ -1,0 +1,100 @@
+database:
+  url: ""
+
+kafka:
+  seeds:
+    - ""
+  user: ""
+  password: ""
+
+allora:
+  rpc: "https://allora-rpc.testnet.allora.network"
+  timeout: 10s
+
+log:
+  level: 1 # -1: trace, 0: debug, 1: info, 2: warn, 3: error, 4: fatal, 5: panic, 6: nolevel, 7: disabled
+
+producer:
+  block_refresh_interval: 5s
+  rate_limit_interval: 1s
+  num_workers: 3
+
+kafka_topic_router:
+  - name: "domain-event.input.allora.allora-testnet-1.staking"
+    types:
+      - "emissions.v3.MsgAddStake"
+      - "emissions.v3.MsgRemoveStake"
+      - "emissions.v4.AddStakeRequest"
+      - "emissions.v4.RemoveStakeRequest"
+  - name: "domain-event.input.allora.allora-testnet-1.delegation"
+    types:
+      - "emissions.v3.StakeInfo"
+      - "emissions.v3.DelegateStakeRemovalInfo"
+  - name: "domain-event.input.allora.allora-testnet-1.reputer-loss"
+    types:
+      - "emissions.v3.MsgInsertReputerPayload"
+      - "emissions.v4.InsertReputerPayloadRequest"
+  - name: "domain-event.input.allora.allora-testnet-1.worker-loss"
+    types:
+      - "emissions.v3.EventNetworkLossSet"
+      - "emissions.v4.EventNetworkLossSet"
+  - name: "domain-event.input.allora.allora-testnet-1.rewards"
+    types:
+      - "emissions.v3.EventRewardsSettled"
+      - "emissions.v4.EventRewardsSettled"
+  - name: "domain-event.input.allora.allora-testnet-1.registration"
+    types:
+      - "emissions.v3.MsgRegister"
+      - "emissions.v3.MsgRemoveRegistration"
+      - "emissions.v4.RemoveRegistrationRequest"
+      - "emissions.v4.RegisterRequest"
+  - name: "domain-event.input.allora.allora-testnet-1.transfer"
+    types:
+      - "cosmos.bank.v1beta1.MsgSend"
+  - name: "domain-event.input.allora.allora-testnet-1.emascores"
+    types:
+      - "emissions.v4.EventEMAScoresSet"
+  - name: "domain-event.input.allora.allora-testnet-1.validator-rewards"
+    types:
+      - "rewards"
+      - "commission"
+      - "withdraw_rewards"
+      - "withdraw_commission"
+  - name: "domain-event.input.allora.allora-testnet-1.fund-topic"
+    types:
+      - "emissions.v3.MsgFundTopic"
+
+filter_event:
+  types:
+    # v3
+    - "emissions.v3.EventNetworkLossSet"
+    - "emissions.v3.EventRewardsSettled"
+    # v4
+    - "emissions.v4.EventNetworkLossSet"
+    - "emissions.v4.EventRewardsSettled"
+    - "emissions.v4.EventEMAScoresSet"
+    # Distribution
+    - "rewards"
+    - "commission"
+    - "withdraw_rewards"
+    - "withdraw_commission"
+
+filter_transaction: # TODO Rename to filter_message?
+  types:
+    # emissions.v3
+    - "emissions.v3.MsgAddStake"
+    - "emissions.v3.MsgRemoveStake"
+    - "emissions.v3.MsgInsertReputerPayload"
+    - "emissions.v3.MsgRegister"
+    - "emissions.v3.MsgRemoveRegistration"
+    - "emissions.v3.StakeInfo" # Only v3
+    - "emissions.v3.DelegateStakeRemovalInfo" # Only v3
+    - "emissions.v3.MsgFundTopic" # Only v3
+    # emissions.v4
+    - "emissions.v4.AddStakeRequest"
+    - "emissions.v4.RemoveStakeRequest"
+    - "emissions.v4.InsertReputerPayloadRequest"
+    - "emissions.v4.RegisterRequest"
+    - "emissions.v4.RemoveRegistrationRequest"
+    # Bank
+    - "cosmos.bank.v1beta1.MsgSend"

@@ -1,5 +1,8 @@
 FROM golang:1.22-alpine
 
+# Default to localnet
+ARG CHAIN_NAME=allora-localnet-1
+
 ENV GO111MODULE=on \
     CGO_ENABLED=0
 
@@ -16,7 +19,6 @@ COPY . .
 
 RUN go build -o allora-producer ./cmd/producer
 
-COPY ./config/config.example.yaml ./config.yaml
+COPY ./config/config.${CHAIN_NAME}.yaml ./config.yaml
 
 CMD ["./allora-producer"]
-
