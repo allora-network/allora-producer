@@ -212,5 +212,148 @@ func TestViperAdapter(t *testing.T) {
 	err = adapter.Unmarshal(&cfg)
 	require.NoError(t, err)
 
+	expectedCfg := config.Config{
+		Database: config.DatabaseConfig{
+			URL: "postgres://devuser:devpass@localhost:5432/dev-indexer?sslmode=disable",
+		},
+		Kafka: config.KafkaConfig{
+			Seeds: []string{
+				"localhost:9092",
+			},
+			User:     "user",
+			Password: "pass",
+		},
+		Allora: config.AlloraConfig{
+			RPC:     "https://allora-rpc.testnet.allora.network",
+			Timeout: 10000000000,
+		},
+		KafkaTopicRouter: []config.KafkaTopicRouterConfig{
+			{
+				Name: "domain-event.input.allora.staking",
+				Types: []string{
+					"emissions.v3.MsgAddStake",
+					"emissions.v3.MsgRemoveStake",
+					"emissions.v4.AddStakeRequest",
+					"emissions.v4.RemoveStakeRequest",
+					"emissions.v5.AddStakeRequest",
+					"emissions.v5.RemoveStakeRequest",
+				},
+			},
+			{
+				Name: "domain-event.input.allora.delegation",
+				Types: []string{
+					"emissions.v3.StakeInfo",
+					"emissions.v3.DelegateStakeRemovalInfo",
+				},
+			},
+			{
+				Name: "domain-event.input.allora.reputer-loss",
+				Types: []string{
+					"emissions.v3.MsgInsertReputerPayload",
+					"emissions.v4.InsertReputerPayloadRequest",
+					"emissions.v5.InsertReputerPayloadRequest",
+				},
+			},
+			{
+				Name: "domain-event.input.allora.worker-loss",
+				Types: []string{
+					"emissions.v3.EventNetworkLossSet",
+					"emissions.v4.EventNetworkLossSet",
+				},
+			},
+			{
+				Name: "domain-event.input.allora.rewards",
+				Types: []string{
+					"emissions.v3.EventRewardsSettled",
+					"emissions.v4.EventRewardsSettled",
+				},
+			},
+			{
+				Name: "domain-event.input.allora.registration",
+				Types: []string{
+					"emissions.v3.MsgRegister",
+					"emissions.v3.MsgRemoveRegistration",
+					"emissions.v4.RemoveRegistrationRequest",
+					"emissions.v4.RegisterRequest",
+					"emissions.v5.RemoveRegistrationRequest",
+					"emissions.v5.RegisterRequest",
+				},
+			},
+			{
+				Name: "domain-event.input.allora.transfer",
+				Types: []string{
+					"cosmos.bank.v1beta1.MsgSend",
+				},
+			},
+			{
+				Name: "domain-event.input.allora.emascores",
+				Types: []string{
+					"emissions.v4.EventEMAScoresSet",
+				},
+			},
+			{
+				Name: "domain-event.input.allora.validator-rewards",
+				Types: []string{
+					"rewards",
+					"commission",
+					"withdraw_rewards",
+					"withdraw_commission",
+				},
+			},
+			{
+				Name: "domain-event.input.allora.fund-topic",
+				Types: []string{
+					"emissions.v3.MsgFundTopic",
+				},
+			},
+		},
+		FilterEvent: config.FilterEventConfig{
+			Types: []string{
+				"emissions.v3.EventNetworkLossSet",
+				"emissions.v3.EventRewardsSettled",
+				"emissions.v4.EventNetworkLossSet",
+				"emissions.v4.EventRewardsSettled",
+				"emissions.v4.EventEMAScoresSet",
+				"rewards",
+				"commission",
+				"withdraw_rewards",
+				"withdraw_commission",
+			},
+		},
+		FilterTransaction: config.FilterTransactionConfig{
+			Types: []string{
+				"emissions.v3.MsgAddStake",
+				"emissions.v3.MsgRemoveStake",
+				"emissions.v3.MsgInsertReputerPayload",
+				"emissions.v3.MsgRegister",
+				"emissions.v3.MsgRemoveRegistration",
+				"emissions.v3.StakeInfo",
+				"emissions.v3.DelegateStakeRemovalInfo",
+				"emissions.v3.MsgFundTopic",
+				"emissions.v4.AddStakeRequest",
+				"emissions.v4.RemoveStakeRequest",
+				"emissions.v4.InsertReputerPayloadRequest",
+				"emissions.v4.RegisterRequest",
+				"emissions.v4.RemoveRegistrationRequest",
+				"cosmos.bank.v1beta1.MsgSend",
+				"emissions.v5.AddStakeRequest",
+				"emissions.v5.RemoveStakeRequest",
+				"emissions.v5.InsertReputerPayloadRequest",
+				"emissions.v5.RegisterRequest",
+				"emissions.v5.RemoveRegistrationRequest",
+			},
+		},
+		Log: config.LogConfig{
+			Level: 1,
+		},
+		Producer: config.ProducerConfig{
+			BlockRefreshInterval: 5000000000,
+			RateLimitInterval:    1000000000,
+			NumWorkers:           3,
+		},
+	}
+
+	assert.Equal(t, expectedCfg, cfg)
+
 	assert.NotEmpty(t, cfg)
 }
