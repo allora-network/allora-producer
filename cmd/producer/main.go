@@ -11,6 +11,7 @@ import (
 	"github.com/allora-network/allora-producer/app/usecase"
 	"github.com/allora-network/allora-producer/codec"
 	"github.com/allora-network/allora-producer/infra"
+	"github.com/allora-network/allora-producer/util"
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/allora-network/allora-producer/config"
@@ -19,11 +20,11 @@ import (
 )
 
 func main() {
-	log.Info().Msg("Starting Allora Chain Producers")
+	log.Info().Str("revision", util.Revision()).Msg("Allora Producers -- Starting")
 	// Load config
 	cfg, err := initializeConfig()
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to load config")
+		log.Fatal().Err(err).Msg("Allora Producers -- Error loading config")
 	}
 
 	initializeLogging(cfg.Log.Level)
@@ -36,13 +37,14 @@ func main() {
 
 	appInstance, cleanup, err := initializeApp(ctx, cfg)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to initialize app")
+		log.Fatal().Err(err).Msg("Allora Producers -- Error initializing app")
 	}
 	defer cleanup()
 
 	if err := appInstance.Run(ctx); err != nil {
-		log.Fatal().Err(err).Msg("failed to run app")
+		log.Fatal().Err(err).Msg("Allora Producers -- Error running app")
 	}
+	log.Info().Msg("Allora Producers -- Finished")
 }
 
 func getTopicMapping(cfg config.Config) map[string]string {

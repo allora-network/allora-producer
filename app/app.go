@@ -19,6 +19,7 @@ func NewApp(eventsProducer domain.EventsProducer, transactionsProducer domain.Tr
 }
 
 func (a *App) Run(ctx context.Context) error {
+	log.Info().Msg("Starting all producers")
 	var wg sync.WaitGroup
 	errChan := make(chan error, 2)
 
@@ -46,7 +47,7 @@ func (a *App) Run(ctx context.Context) error {
 	wg.Wait()
 	close(errChan)
 
-	log.Info().Msg("All use cases completed")
+	log.Info().Msg("All producers finished")
 
 	// Check for errors
 	var errs []error

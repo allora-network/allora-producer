@@ -23,6 +23,8 @@ import (
 	// Make sure types are imported in this order (newest to oldest) to avoid conflicts
 	emissions "github.com/allora-network/allora-chain/x/emissions/types"
 
+	emissionsv4 "github.com/allora-network/allora-producer/codec/allora-chain/x/emissions/v4types"
+
 	emissionsv3 "github.com/allora-network/allora-producer/codec/allora-chain/x/emissions/v3types"
 
 	emissionsv2 "github.com/allora-network/allora-producer/codec/allora-chain/x/emissions/v2types"
@@ -69,8 +71,9 @@ var defaultRegisterFuncs = []func(codectypes.InterfaceRegistry){
 	emissions.RegisterInterfaces,
 	mint.RegisterInterfaces,
 	// Allora types (local)
-	emissionsv2.RegisterInterfaces,
+	emissionsv4.RegisterInterfaces,
 	emissionsv3.RegisterInterfaces,
+	emissionsv2.RegisterInterfaces,
 }
 
 // NewCodec creates a new instance of Codec with registered interfaces.

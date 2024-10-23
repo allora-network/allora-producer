@@ -1,4 +1,5 @@
 FROM golang:1.22-alpine
+RUN apk add git
 
 # Default to localnet
 ARG CHAIN_NAME=allora-localnet-1
@@ -17,7 +18,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o allora-producer ./cmd/producer
+RUN go build -buildvcs -o allora-producer ./cmd/producer
 
 COPY ./config/config.${CHAIN_NAME}.yaml ./config.yaml
 

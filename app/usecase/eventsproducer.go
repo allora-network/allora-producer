@@ -54,7 +54,7 @@ func (m *EventsProducer) Execute(ctx context.Context) error {
 
 func (m *EventsProducer) processBlockResults(ctx context.Context, height int64) error {
 	defer util.LogExecutionTime(time.Now(), "EventsProducer.processBlockResults", map[string]interface{}{"height": height}, m.logger)
-	m.logger.Info().Int64("height", height).Msg("EventsProducer.processBlockResults")
+	m.logger.Info().Int64("height", height).Msg("EventsProducer.processBlockResults -- Started")
 	// Fetch BlockResults
 	blockResults, err := m.alloraClient.GetBlockResults(ctx, height)
 	if err != nil {
@@ -82,6 +82,8 @@ func (m *EventsProducer) processBlockResults(ctx context.Context, height int64) 
 	if err != nil {
 		return fmt.Errorf("failed to save processed block results for height %d: %w", height, err)
 	}
+
+	m.logger.Info().Int64("height", height).Msg("EventsProducer.processBlockResults -- Completed")
 
 	return nil
 }

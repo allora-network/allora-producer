@@ -28,7 +28,7 @@ func (bm *BaseProducer) InitStartHeight(ctx context.Context) error {
 		for {
 			latestHeight, err := bm.alloraClient.GetLatestBlockHeight(ctx)
 			if err != nil {
-				bm.logger.Warn().Err(err).Msg("failed to get latest block height")
+				bm.logger.Warn().Err(err).Msg("Failed to get latest block height")
 				retryCount++
 				if retryCount > 5 {
 					return fmt.Errorf("failed to get latest block height after 5 retries: %w", err)
@@ -55,7 +55,7 @@ func (bm *BaseProducer) MonitorLoop(ctx context.Context, processBlock func(ctx c
 
 		// Process the block or block results at the current height
 		if err := processBlock(ctx, bm.startHeight); err != nil {
-			bm.logger.Warn().Err(err).Msgf("failed to process block at height %d", bm.startHeight)
+			bm.logger.Warn().Err(err).Msgf("Failed to process block at height %d", bm.startHeight)
 			time.Sleep(bm.rateLimitInterval)
 			continue
 		}
@@ -81,16 +81,17 @@ func (bm *BaseProducer) MonitorLoopParallel(ctx context.Context, processBlock fu
 			default:
 			}
 
-			bm.logger.Info().Msg("getting latest block height")
+			bm.logger.Info().Msg("Getting latest block height")
 			latestHeight, err := bm.alloraClient.GetLatestBlockHeight(ctx)
 			if err != nil {
-				bm.logger.Warn().Err(err).Msg("failed to get latest block height")
+				bm.logger.Warn().Err(err).Msg("Failed to get latest block height")
 				time.Sleep(bm.rateLimitInterval)
 				continue
 			}
-			bm.logger.Info().Msgf("latest block height: %d", latestHeight)
-			bm.logger.Info().Msgf("start height: %d", bm.startHeight)
+			bm.logger.Info().Msgf("Latest block height: %d", latestHeight)
+			bm.logger.Info().Msgf("Start height: %d", bm.startHeight)
 			for bm.startHeight <= latestHeight {
+				bm.logger.Info().Int64("height", bm.startHeight).Msg("Enqueuing new block")
 				blockQueue <- bm.startHeight
 				bm.startHeight++
 			}
@@ -107,12 +108,13 @@ func (bm *BaseProducer) MonitorLoopParallel(ctx context.Context, processBlock fu
 			defer wg.Done()
 			for height := range blockQueue {
 				if err := processBlock(ctx, height); err != nil {
-					bm.logger.Warn().Err(err).Msgf("failed to process block at height %d", height)
+					bm.logger.Warn().Err(err).Msgf("Failed to process block at height %d", height)
 					// Re-enqueue for immediate retry
 					if blockQueue != nil {
 						blockQueue <- height
 					}
 				}
+				bm.logger.Info().Int64("height", height).Msg("Block processed successfully")
 				time.Sleep(bm.rateLimitInterval)
 			}
 		}()

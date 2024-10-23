@@ -27,6 +27,8 @@ kafka_topic_router:
       - "emissions.v3.MsgRemoveStake"
       - "emissions.v4.AddStakeRequest"
       - "emissions.v4.RemoveStakeRequest"
+      - "emissions.v5.AddStakeRequest"
+      - "emissions.v5.RemoveStakeRequest"
   - name: "domain-event.input.allora.allora-devnet-1.delegation"
     types:
       - "emissions.v3.StakeInfo"
@@ -35,6 +37,7 @@ kafka_topic_router:
     types:
       - "emissions.v3.MsgInsertReputerPayload"
       - "emissions.v4.InsertReputerPayloadRequest"
+      - "emissions.v5.InsertReputerPayloadRequest"
   - name: "domain-event.input.allora.allora-devnet-1.worker-loss"
     types:
       - "emissions.v3.EventNetworkLossSet"
@@ -49,6 +52,8 @@ kafka_topic_router:
       - "emissions.v3.MsgRemoveRegistration"
       - "emissions.v4.RemoveRegistrationRequest"
       - "emissions.v4.RegisterRequest"
+      - "emissions.v5.RemoveRegistrationRequest"
+      - "emissions.v5.RegisterRequest"
   - name: "domain-event.input.allora.allora-devnet-1.transfer"
     types:
       - "cosmos.bank.v1beta1.MsgSend"
@@ -99,3 +104,9 @@ filter_transaction: # TODO Rename to filter_message?
     - "emissions.v4.RemoveRegistrationRequest"
     # Bank
     - "cosmos.bank.v1beta1.MsgSend"
+    # emissions.v5
+    - "emissions.v5.AddStakeRequest"
+    - "emissions.v5.RemoveStakeRequest"
+    - "emissions.v5.InsertReputerPayloadRequest"
+    - "emissions.v5.RegisterRequest"
+    - "emissions.v5.RemoveRegistrationRequest"

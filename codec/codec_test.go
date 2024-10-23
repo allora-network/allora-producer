@@ -5,7 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	emissionsv3 "github.com/allora-network/allora-producer/codec/allora-chain/x/emissions/v3types"
 	abcitypes "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -17,6 +16,7 @@ import (
 	mock "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	emissions "github.com/allora-network/allora-chain/x/emissions/types"
 	"github.com/allora-network/allora-producer/codec/mocks"
 )
 
@@ -38,14 +38,14 @@ func TestCodec_AddInterfaces(t *testing.T) {
 	c, _, _ := newTestCodec()
 
 	// Attempt to resolve an interface before adding it
-	_, err := c.interfaceRegistry.Resolve("/emissions.v3.MsgInsertReputerPayload")
+	_, err := c.interfaceRegistry.Resolve("/emissions.v5.InsertWorkerPayloadRequest")
 	require.Error(t, err)
 
 	// Add a new interface
-	c.AddInterfaces(emissionsv3.RegisterInterfaces)
+	c.AddInterfaces(emissions.RegisterInterfaces)
 
 	// Resolve the interface after adding it
-	_, err = c.interfaceRegistry.Resolve("/emissions.v3.MsgInsertReputerPayload")
+	_, err = c.interfaceRegistry.Resolve("/emissions.v5.InsertWorkerPayloadRequest")
 	require.NoError(t, err)
 }
 

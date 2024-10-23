@@ -54,7 +54,7 @@ func (m *TransactionsProducer) Execute(ctx context.Context) error {
 
 func (m *TransactionsProducer) processBlock(ctx context.Context, height int64) error {
 	defer util.LogExecutionTime(time.Now(), "TransactionsProducer.processBlock", map[string]interface{}{"height": height}, m.logger)
-	m.logger.Info().Int64("height", height).Msg("TransactionsProducer.processBlock")
+	m.logger.Info().Int64("height", height).Msg("TransactionsProducer.processBlock -- Started")
 	// Fetch Block
 	block, err := m.alloraClient.GetBlockByHeight(ctx, height)
 	if err != nil {
@@ -77,5 +77,6 @@ func (m *TransactionsProducer) processBlock(ctx context.Context, height int64) e
 		return fmt.Errorf("failed to save processed block for height %d: %w", height, err)
 	}
 
+	m.logger.Info().Int64("height", height).Msg("TransactionsProducer.processBlock -- Completed")
 	return nil
 }
