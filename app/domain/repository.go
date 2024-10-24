@@ -1,0 +1,71 @@
+package domain
+
+import (
+	"context"
+	"encoding/json"
+
+	abcitypes "github.com/cometbft/cometbft/abci/types"
+	ctypes "github.com/cometbft/cometbft/rpc/core/types"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/types/tx"
+	"github.com/cosmos/gogoproto/proto"
+)
+
+//go:generate mockery --name=AlloraClientInterface
+type AlloraClientInterface interface {
+	// GetLatestBlockHeight returns the latest block height
+	GetLatestBlockHeight(ctx context.Context) (int64, error)
+	// GetBlockByHeight returns a block by height
+	GetBlockByHeight(ctx context.Context, height int64) (*ctypes.ResultBlock, error)
+	// GetBlockResults returns the results of a block by height
+	GetBlockResults(ctx context.Context, height int64) (*ctypes.ResultBlockResults, error)
+	// GetHeader returns the header of a block by height
+	GetHeader(ctx context.Context, height int64) (*ctypes.ResultHeader, error)
+}
+
+// TopicRouter defines the interface for determining Kafka topics based on message types.
+//
+//go:generate mockery --name=TopicRouter
+type TopicRouter interface {
+	// GetTopic returns the Kafka topic for a given message type
+	GetTopic(msgType string) (string, error)
+}
+
+//go:generate mockery --name=StreamingClient
+type StreamingClient interface {
+	// PublishAsync publishes a message to a topic asynchronously
+	PublishAsync(ctx context.Context, msgType string, message []byte, blockHeight int64) error
+	// Close closes the client
+	Close() error
+	// Flush flushes the client
+	Flush(ctx context.Context) error
+}
+
+// CodecInterface defines the interface for encoding and decoding messages
+//
+//go:generate mockery --name=CodecInterface
+type CodecInterface interface {
+	// ParseTx parses a transaction
+	ParseTx(txBytes []byte) (*tx.Tx, error)
+	// ParseTxMessage parses a transaction message
+	ParseTxMessage(message *codectypes.Any) (proto.Message, error)
+	// ParseTxMessages parses transaction messages
+	ParseTxMessages(txMessages []*codectypes.Any) ([]proto.Message, error)
+	// ParseEvent parses a typed event
+	ParseEvent(event *abcitypes.Event) (proto.Message, error)
+	// MarshalProtoJSON marshals a protobuf message to JSON
+	MarshalProtoJSON(event proto.Message) (json.RawMessage, error)
+	// ParseUntypedEvent parses an untyped event
+	ParseUntypedEvent(event *abcitypes.Event) (json.RawMessage, error)
+	// IsTypedEvent checks if an event is typed
+	IsTypedEvent(event *abcitypes.Event) bool
+}
+
+//go:generate mockery --name=ProcessedBlockRepositoryInterface
+type ProcessedBlockRepositoryInterface interface {
+	GetLastProcessedBlock(ctx context.Context) (ProcessedBlock, error)
+	SaveProcessedBlock(ctx context.Context, block ProcessedBlock) error
+
+	GetLastProcessedBlockEvent(ctx context.Context) (ProcessedBlockEvent, error)
+	SaveProcessedBlockEvent(ctx context.Context, blockEvent ProcessedBlockEvent) error
+}

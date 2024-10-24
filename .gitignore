@@ -1,0 +1,9 @@
+bin/
+*.out
+config.yaml
+*.env
+*.log
+*.html
+*.tmp
+coverage/
+*.txt
